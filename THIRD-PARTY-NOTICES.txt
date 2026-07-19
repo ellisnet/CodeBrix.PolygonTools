@@ -1,0 +1,220 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+CodeBrix.PolygonTools is a fully managed 2D polygon clipping and offsetting
+library for .NET. It performs the four boolean set operations - intersection,
+union, difference and exclusive-or - on arbitrary sets of polygons and open
+paths, and inflates or deflates polygons with miter, round or square joins.
+
+CodeBrix.PolygonTools DOES incorporate third-party source code. Substantially
+all of its production source is derived from the Clipper library by Angus
+Johnson, as detailed in entry 1 below. That code remains subject to the Boost
+Software License 1.0, whose full text is reproduced in entry 1 and also ships
+as license-boost.txt at the root of this repository and inside the NuGet
+package.
+
+Jeremy Ellis and contributors license the CodeBrix.PolygonTools project to you
+under the terms set forth in the LICENSE file, which is located at the root of
+this repository. The MIT license in that file governs the CodeBrix additions
+and the combined work; it does NOT replace the Boost Software License terms
+that continue to apply to the derived code described below, and it does not
+relieve you of the obligation to keep the Boost copyright notices and license
+statement with any source-form copy or derivative work you distribute.
+
+If you have any questions about any third-party code or services referenced
+here, or if you believe that any third-party code has been included in
+CodeBrix.PolygonTools in error, please open a new issue at:
+https://github.com/ellisnet/CodeBrix.PolygonTools/issues
+
+================================================================================
+
+1. Clipper (also known as the "polyclipping" project)
+
+   Project ...... Clipper - a polygon and line clipping and offsetting library
+   Author ....... Angus Johnson
+   Version ...... 6.4.2, dated 27 February 2017 (the final 1.x release)
+   Website ...... http://www.angusj.com
+   Source ....... https://sourceforge.net/projects/polyclipping/
+                  clipper_ver6.4.2.zip, file C#/clipper_library/clipper.cs
+   Copyright .... Copyright (c) 2010-2017 Angus Johnson
+   License ...... Boost Software License 1.0 (BSL-1.0)
+
+   The upstream algorithm is an extension of Bala Vatti's clipping algorithm,
+   "A generic solution to polygon clipping", Communications of the ACM, Vol 35,
+   Issue 7 (July 1992) pp 56-63, together with "Polygon Offsetting by Computing
+   Winding Numbers", paper no. DETC2005-85513 pp. 565-575, ASME 2005 IDETC/CIE.
+   Those attributions are preserved verbatim in the header of every derived
+   source file.
+
+   ---------------------------------------------------------------------------
+   DERIVED PRODUCTION SOURCE FILES
+   ---------------------------------------------------------------------------
+
+   Every file listed below was produced by splitting the single upstream
+   source file C#/clipper_library/clipper.cs (4,913 lines) into one file per
+   type. Each carries the upstream copyright/license/attribution header
+   verbatim and a "//was previously: ClipperLib;" provenance comment on its
+   namespace declaration.
+
+     src/CodeBrix.PolygonTools/PolyClip.cs
+     src/CodeBrix.PolygonTools/PolyClipBase.cs
+     src/CodeBrix.PolygonTools/PolyClipException.cs
+     src/CodeBrix.PolygonTools/PolyClipOffset.cs
+     src/CodeBrix.PolygonTools/Enumerations/ClipType.cs
+     src/CodeBrix.PolygonTools/Enumerations/EndType.cs
+     src/CodeBrix.PolygonTools/Enumerations/JoinType.cs
+     src/CodeBrix.PolygonTools/Enumerations/PolyFillType.cs
+     src/CodeBrix.PolygonTools/Enumerations/PolyType.cs
+     src/CodeBrix.PolygonTools/Internal/Direction.cs
+     src/CodeBrix.PolygonTools/Internal/EdgeSide.cs
+     src/CodeBrix.PolygonTools/Internal/Join.cs
+     src/CodeBrix.PolygonTools/Internal/LocalMinima.cs
+     src/CodeBrix.PolygonTools/Internal/Maxima.cs
+     src/CodeBrix.PolygonTools/Internal/OutPt.cs
+     src/CodeBrix.PolygonTools/Internal/OutRec.cs
+     src/CodeBrix.PolygonTools/Internal/Scanbeam.cs
+     src/CodeBrix.PolygonTools/Internal/TEdge.cs
+     src/CodeBrix.PolygonTools/Models/DoublePoint.cs
+     src/CodeBrix.PolygonTools/Models/IntPoint.cs
+     src/CodeBrix.PolygonTools/Models/IntRect.cs
+     src/CodeBrix.PolygonTools/Models/IntersectNode.cs
+     src/CodeBrix.PolygonTools/Models/MyIntersectNodeSort.cs
+     src/CodeBrix.PolygonTools/Models/PolyNode.cs
+     src/CodeBrix.PolygonTools/Models/PolyTree.cs
+
+   ---------------------------------------------------------------------------
+   DERIVED TEST SOURCE FILES
+   ---------------------------------------------------------------------------
+
+     tests/CodeBrix.PolygonTools.Tests/UpstreamInt128Reference.cs
+
+   This one file is a verbatim copy of the upstream Int128 helper struct, with
+   the type renamed to UpstreamInt128. It is NOT used by the library. It is
+   retained solely as the reference oracle for UpstreamInt128Tests, the
+   differential test that verifies the System.Int128 substitution described in
+   modification (d) below reaches identical results. It carries the upstream
+   copyright header verbatim, as every derived file does.
+
+   The upstream 6.4.2 distribution ships no unit-test suite, so no other test
+   file is derived from it; everything else under
+   tests/CodeBrix.PolygonTools.Tests/ was written fresh for this repository.
+
+   ---------------------------------------------------------------------------
+   MODIFICATIONS MADE
+   ---------------------------------------------------------------------------
+
+   The following changes were made to the upstream source during the port.
+   None of them alters the clipping or offsetting algorithms.
+
+   a) Type renames. Five identifiers containing "Clipper" were renamed so that
+      the CodeBrix library does not carry the upstream product name in its
+      live code:
+
+          ClipperLib (namespace) -> CodeBrix.PolygonTools
+          Clipper                -> PolyClip
+          ClipperBase            -> PolyClipBase
+          ClipperOffset          -> PolyClipOffset
+          ClipperException       -> PolyClipException
+
+      No other identifier was renamed. In particular ClipType, PolyType,
+      PolyFillType, JoinType, EndType, IntPoint, IntRect, DoublePoint,
+      PolyNode, PolyTree and all enum member names are unchanged from upstream.
+      Occurrences of "Clipper" in comments - including the two "see comments in
+      clipper.pas" provenance notes and the "translation of the Delphi Clipper
+      library" line in the file header - were deliberately left intact.
+
+   b) File split. The single 4,913-line clipper.cs was split into one file per
+      type, organized into Models/, Enumerations/ and Internal/ sub-folders per
+      CodeBrix family convention. Type bodies were dedented by one level to
+      suit a file-scoped namespace; no statement was otherwise altered.
+
+   c) Conditional compilation removed. The upstream source is guarded by three
+      compile-time switches. They were evaluated once for this library's
+      net10.0-only target and the dead branches, along with the #if/#else/#endif
+      directives themselves, were removed:
+
+          use_lines  ENABLED  upstream (open-path clipping retained)
+          use_int32  disabled upstream (64-bit coordinates retained)
+          use_xyz    disabled upstream (no Z member on IntPoint)
+
+      Because use_int32 is off, the upstream "cInt" alias resolves to Int64 and
+      was replaced throughout with the C# "long" keyword. This does not change
+      any public signature.
+
+   d) The upstream Int128 helper struct was REMOVED and replaced with the
+      framework's System.Int128, which did not exist when the upstream code was
+      written (it was introduced in .NET 7).
+
+      The upstream struct was 178 lines, but the library used exactly one of its
+      members: the static Int128Mul(long, long), at four sites in PolyClipBase
+      (PointOnLineSegment and the three SlopesEqual overloads), and only inside
+      equality comparisons of the form "Int128Mul(a, b) == Int128Mul(c, d)".
+      Every other member of the struct - the +, -, unary -, <, >, != operators,
+      IsNegative and the explicit double conversion - was unreachable from the
+      library. Those four sites now read "(Int128)a * b == (Int128)c * d".
+
+      This is the only modification that changes an expression inside a method
+      body. It was verified by differential testing rather than by inspection: a
+      verbatim copy of the upstream struct is retained in the test project (see
+      DERIVED TEST SOURCE FILES above) and UpstreamInt128Tests asserts that both
+      implementations reach an identical equality decision across every
+      combination of 20 boundary values - 160,000 comparisons, including
+      long.MinValue, where the upstream negation silently overflows - plus
+      1,000,000 seeded random products drawn from the full coordinate range,
+      with System.Int128 additionally cross-checked against System.Numerics.
+      BigInteger as an independent oracle. No divergence exists.
+
+      One upstream defect disappears as a consequence, and is recorded here
+      because it was real: the upstream explicit double conversion negated with
+      a one's complement (~lo + ~hi * 2^64) instead of a two's complement, so
+      every negative value converted to a double one unit short in magnitude.
+      That conversion was never reachable from the library.
+
+   e) XML documentation comments were added to the public API surface. The
+      upstream source carries almost no XML doc comments; the summaries were
+      written for this port against the upstream HTML documentation shipped in
+      clipper_ver6.4.2.zip (Documentation/Docs/Units/ClipperLib). These are
+      additions only - no upstream comment was removed or reworded.
+
+   f) Target framework. The upstream C# project targeted .NET Framework;
+      this library targets net10.0 only.
+
+   g) Syntax modernization. Changes were made in the CodeBrix.PolygonTools
+      codebase to update the syntax of certain code areas to be aligned with
+      .NET 10 and C# version 14 coding/syntax conventions - while preserving
+      the original intentions of the code.
+
+   Apart from the Int128 helper described in (d), no upstream file was omitted
+   from the port, and no upstream type, method, property, field or enum member
+   was dropped.
+
+   ---------------------------------------------------------------------------
+   BOOST SOFTWARE LICENSE 1.0 - FULL TEXT
+   ---------------------------------------------------------------------------
+
+   Boost Software License - Version 1.0 - August 17th, 2003
+
+   Permission is hereby granted, free of charge, to any person or organization
+   obtaining a copy of the software and accompanying documentation covered by
+   this license (the "Software") to use, reproduce, display, distribute,
+   execute, and transmit the Software, and to prepare derivative works of the
+   Software, and to permit third-parties to whom the Software is furnished to
+   do so, all subject to the following:
+
+   The copyright notices in the Software and this entire statement, including
+   the above license grant, this restriction and the following disclaimer,
+   must be included in all copies of the Software, in whole or in part, and
+   all derivative works of the Software, unless such copies or derivative
+   works are solely in the form of machine-executable object code generated by
+   a source language processor.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+   SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+   FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+================================================================================
+
+END OF THIRD-PARTY SOFTWARE NOTICES AND INFORMATION

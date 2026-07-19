@@ -19,3 +19,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+--------------------------------------------------------------------------------
+
+NOTICE REGARDING INCORPORATED THIRD-PARTY SOURCE CODE
+
+Portions of this software are derived from the Clipper library, version 6.4.2,
+Copyright (c) 2010-2017 Angus Johnson, which is licensed under the Boost
+Software License 1.0. Those portions remain subject to that license.
+
+The Boost Software License 1.0 requires that the copyright notices and the
+entire license statement be included in all copies of the software, in whole or
+in part, and in all derivative works of the software, except where such copies
+or derivative works are solely in the form of machine-executable object code.
+Those notices must therefore be retained in any source-form copy or derivative
+work of this software that you distribute.
+
+The full Boost Software License 1.0 text is reproduced in license-boost.txt at
+the root of this repository. See THIRD-PARTY-NOTICES.txt for the complete
+attribution, the list of derived files, and the modifications that were made.
