@@ -1,43 +1,42 @@
 /*******************************************************************************
-*                                                                              *
-* Author    :  Angus Johnson                                                   *
-* Version   :  6.4.2                                                           *
-* Date      :  27 February 2017                                                *
-* Website   :  http://www.angusj.com                                           *
-* Copyright :  Angus Johnson 2010-2017                                         *
-*                                                                              *
-* License:                                                                     *
-* Use, modification & distribution is subject to Boost Software License Ver 1. *
-* http://www.boost.org/LICENSE_1_0.txt                                         *
-*                                                                              *
-* Attributions:                                                                *
-* The code in this library is an extension of Bala Vatti's clipping algorithm: *
-* "A generic solution to polygon clipping"                                     *
-* Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
-* http://portal.acm.org/citation.cfm?id=129906                                 *
-*                                                                              *
-* Computer graphics and geometric modeling: implementation and algorithms      *
-* By Max K. Agoston                                                            *
-* Springer; 1 edition (January 4, 2005)                                        *
-* http://books.google.com/books?q=vatti+clipping+agoston                       *
-*                                                                              *
-* See also:                                                                    *
-* "Polygon Offsetting by Computing Winding Numbers"                            *
-* Paper no. DETC2005-85513 pp. 565-575                                         *
-* ASME 2005 International Design Engineering Technical Conferences             *
-* and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
-* September 24-28, 2005 , Long Beach, California, USA                          *
-* http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
-*                                                                              *
-*******************************************************************************/
+ *                                                                              *
+ * Author    :  Angus Johnson                                                   *
+ * Version   :  6.4.2                                                           *
+ * Date      :  27 February 2017                                                *
+ * Website   :  http://www.angusj.com                                           *
+ * Copyright :  Angus Johnson 2010-2017                                         *
+ *                                                                              *
+ * License:                                                                     *
+ * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * http://www.boost.org/LICENSE_1_0.txt                                         *
+ *                                                                              *
+ * Attributions:                                                                *
+ * The code in this library is an extension of Bala Vatti's clipping algorithm: *
+ * "A generic solution to polygon clipping"                                     *
+ * Communications of the ACM, Vol 35, Issue 7 (July 1992) pp 56-63.             *
+ * http://portal.acm.org/citation.cfm?id=129906                                 *
+ *                                                                              *
+ * Computer graphics and geometric modeling: implementation and algorithms      *
+ * By Max K. Agoston                                                            *
+ * Springer; 1 edition (January 4, 2005)                                        *
+ * http://books.google.com/books?q=vatti+clipping+agoston                       *
+ *                                                                              *
+ * See also:                                                                    *
+ * "Polygon Offsetting by Computing Winding Numbers"                            *
+ * Paper no. DETC2005-85513 pp. 565-575                                         *
+ * ASME 2005 International Design Engineering Technical Conferences             *
+ * and Computers and Information in Engineering Conference (IDETC/CIE2005)      *
+ * September 24-28, 2005 , Long Beach, California, USA                          *
+ * http://www.me.berkeley.edu/~mcmains/pubs/DAC05OffsetPolygon.pdf              *
+ *                                                                              *
+ *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
 using CodeBrix.PolygonTools.Enumerations;
-using CodeBrix.PolygonTools.Internal;
+using System.Collections.Generic;
 using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
+
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
 
 namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 
@@ -52,16 +51,16 @@ namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 public class PolyNode 
 {
     internal PolyNode m_Parent;
-    internal Path m_polygon = new Path();
+    internal Path m_polygon = [];
     internal int m_Index;
     internal JoinType m_jointype;
     internal EndType m_endtype;
-    internal List<PolyNode> m_Childs = new List<PolyNode>();
+    internal List<PolyNode> m_Childs = [];
 
     private bool IsHoleNode()
     {
-        bool result = true;
-        PolyNode node = m_Parent;
+        var result = true;
+        var node = m_Parent;
         while (node != null)
         {
             result = !result;
@@ -73,22 +72,16 @@ public class PolyNode
     /// <summary>
     /// Gets the number of child nodes belonging to this node.
     /// </summary>
-    public int ChildCount
-    {
-        get { return m_Childs.Count; }
-    }
+    public int ChildCount => m_Childs.Count;
 
     /// <summary>
     /// Gets the path that this node represents.
     /// </summary>
-    public Path Contour
-    {
-        get { return m_polygon; }
-    }
+    public Path Contour => m_polygon;
 
     internal void AddChild(PolyNode Child)
     {
-        int cnt = m_Childs.Count;
+        var cnt = m_Childs.Count;
         m_Childs.Add(Child);
         Child.m_Parent = this;
         Child.m_Index = cnt;
@@ -99,48 +92,34 @@ public class PolyNode
     /// and otherwise moving on to the next sibling of this node or of an ancestor.
     /// </summary>
     /// <returns>The next node in the traversal, or <c>null</c> once the tree is exhausted.</returns>
-    public PolyNode GetNext()
-    {
-        if (m_Childs.Count > 0) 
-            return m_Childs[0]; 
-        else
-            return GetNextSiblingUp();        
-    }
+    public PolyNode GetNext() => (m_Childs.Count > 0) 
+        ? m_Childs[0] 
+        : GetNextSiblingUp();
 
-    internal PolyNode GetNextSiblingUp()
-    {
-        if (m_Parent == null)
-            return null;
-        else if (m_Index == m_Parent.m_Childs.Count - 1)
-            return m_Parent.GetNextSiblingUp();
-        else
-            return m_Parent.m_Childs[m_Index + 1];
-    }
+    internal PolyNode GetNextSiblingUp() =>
+        m_Parent switch
+        {
+            null => null,
+            _ => (m_Index == m_Parent.m_Childs.Count - 1) 
+                ? m_Parent.GetNextSiblingUp() 
+                : m_Parent.m_Childs[m_Index + 1]
+        };
 
     /// <summary>
     /// Gets the child nodes of this node.
     /// </summary>
-    public List<PolyNode> Childs
-    {
-        get { return m_Childs; }
-    }
+    public List<PolyNode> Childs => m_Childs;
 
     /// <summary>
     /// Gets the node that contains this one, or <c>null</c> for the root of the tree.
     /// </summary>
-    public PolyNode Parent
-    {
-        get { return m_Parent; }
-    }
+    public PolyNode Parent => m_Parent;
 
     /// <summary>
     /// Gets a value indicating whether this node represents a hole rather than an outer
     /// polygon. Holes and outer polygons alternate with each level of nesting.
     /// </summary>
-    public bool IsHole
-    {
-        get { return IsHoleNode(); }
-    }
+    public bool IsHole => IsHoleNode();
 
     /// <summary>
     /// Gets a value indicating whether this node represents an open path rather than a

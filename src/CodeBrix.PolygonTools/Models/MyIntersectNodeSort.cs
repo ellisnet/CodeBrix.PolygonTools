@@ -33,11 +33,6 @@
 
 using System;
 using System.Collections.Generic;
-using CodeBrix.PolygonTools;
-using CodeBrix.PolygonTools.Enumerations;
-using CodeBrix.PolygonTools.Internal;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
 
 namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 
@@ -59,9 +54,16 @@ public class MyIntersectNodeSort : IComparer<IntersectNode>
   /// </returns>
   public int Compare(IntersectNode node1, IntersectNode node2)
   {
-    long i = node2.Pt.Y - node1.Pt.Y;
-    if (i > 0) return 1;
-    else if (i < 0) return -1;
-    else return 0;
+      ArgumentNullException.ThrowIfNull(node1);
+      ArgumentNullException.ThrowIfNull(node2);
+
+      var i = node2.Pt.Y - node1.Pt.Y;
+      
+      return i switch
+      {
+          > 0 => 1,
+          < 0 => -1,
+          _ => 0
+      };
   }
 }

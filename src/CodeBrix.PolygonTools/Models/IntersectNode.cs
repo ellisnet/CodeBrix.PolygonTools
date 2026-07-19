@@ -31,13 +31,7 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
-using CodeBrix.PolygonTools.Enumerations;
 using CodeBrix.PolygonTools.Internal;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
 
 namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 
@@ -51,4 +45,4 @@ public class IntersectNode
     internal TEdge Edge1;
     internal TEdge Edge2;
     internal IntPoint Pt;
-};
+}

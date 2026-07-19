@@ -215,7 +215,7 @@ public class PolyClipOffsetTests
         var offset = new PolyClipOffset();
 
         //Act
-        Action act = () => offset.AddPath(
+        var act = () => offset.AddPath(
             [
                 new IntPoint(long.MaxValue, 0), new IntPoint(10, 10), new IntPoint(5, 20)
             ],

@@ -31,6 +31,8 @@
 *                                                                              *
 *******************************************************************************/
 
+// ReSharper disable UnusedMember.Global
+
 namespace CodeBrix.PolygonTools.Enumerations; //was previously: ClipperLib;
 
 /// <summary>

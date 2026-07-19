@@ -38,6 +38,7 @@ using CodeBrix.PolygonTools.Internal;
 using CodeBrix.PolygonTools.Models;
 using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
+// ReSharper disable InconsistentNaming
 
 namespace CodeBrix.PolygonTools; //was previously: ClipperLib;
 
@@ -56,7 +57,7 @@ public class PolyClipBase
   internal const int Skip = -2;
   internal const int Unassigned = -1;
   internal const double tolerance = 1.0E-20;
-  internal static bool near_zero(double val){return (val > -tolerance) && (val < tolerance);}
+  internal static bool near_zero(double val){return val is > -tolerance and < tolerance;}
 
   /// <summary>
   /// The largest coordinate magnitude that can be used when the clipping result is required
@@ -98,7 +99,7 @@ public class PolyClipBase
   /// <param name="val2">The second value, which receives the value of <paramref name="val1"/>.</param>
   public void Swap(ref long val1, ref long val2)
   {
-    long tmp = val1;
+    var tmp = val1;
     val1 = val2;
     val2 = tmp;
   }
@@ -112,7 +113,7 @@ public class PolyClipBase
 
   internal bool PointIsVertex(IntPoint pt, OutPt pp)
   {
-    OutPt pp2 = pp;
+    var pp2 = pp;
     do
     {
       if (pp2.Pt == pt) return true;
@@ -145,7 +146,7 @@ public class PolyClipBase
 
   internal bool PointOnPolygon(IntPoint pt, OutPt pp, bool UseFullRange)
   {
-    OutPt pp2 = pp;
+    var pp2 = pp;
     while (true)
     {
       if (PointOnLineSegment(pt, pp2.Pt, pp2.Next.Pt, UseFullRange))
@@ -162,8 +163,8 @@ public class PolyClipBase
       if (UseFullRange)
         return (Int128)e1.Delta.Y * e2.Delta.X ==
             (Int128)e1.Delta.X * e2.Delta.Y;
-      else return (long)(e1.Delta.Y) * (e2.Delta.X) ==
-        (long)(e1.Delta.X) * (e2.Delta.Y);
+      else return e1.Delta.Y * (e2.Delta.X) ==
+        e1.Delta.X * (e2.Delta.Y);
   }
   //------------------------------------------------------------------------------
 
@@ -174,7 +175,7 @@ public class PolyClipBase
           return (Int128)(pt1.Y - pt2.Y) * (pt2.X - pt3.X) ==
             (Int128)(pt1.X - pt2.X) * (pt2.Y - pt3.Y);
       else return
-        (long)(pt1.Y - pt2.Y) * (pt2.X - pt3.X) - (long)(pt1.X - pt2.X) * (pt2.Y - pt3.Y) == 0;
+        (pt1.Y - pt2.Y) * (pt2.X - pt3.X) - (pt1.X - pt2.X) * (pt2.Y - pt3.Y) == 0;
   }
   //------------------------------------------------------------------------------
 
@@ -185,7 +186,7 @@ public class PolyClipBase
           return (Int128)(pt1.Y - pt2.Y) * (pt3.X - pt4.X) ==
             (Int128)(pt1.X - pt2.X) * (pt3.Y - pt4.Y);
       else return
-        (long)(pt1.Y - pt2.Y) * (pt3.X - pt4.X) - (long)(pt1.X - pt2.X) * (pt3.Y - pt4.Y) == 0;
+        (pt1.Y - pt2.Y) * (pt3.X - pt4.X) - (pt1.X - pt2.X) * (pt3.Y - pt4.Y) == 0;
   }
   //------------------------------------------------------------------------------
 
@@ -205,9 +206,9 @@ public class PolyClipBase
   public virtual void Clear()
   {
       DisposeLocalMinimaList();
-      for (int i = 0; i < m_edges.Count; ++i)
+      for (var i = 0; i < m_edges.Count; ++i)
       {
-          for (int j = 0; j < m_edges[i].Count; ++j) m_edges[i][j] = null;
+          for (var j = 0; j < m_edges[i].Count; ++j) m_edges[i][j] = null;
           m_edges[i].Clear();
       }
       m_edges.Clear();
@@ -220,7 +221,7 @@ public class PolyClipBase
   {
       while( m_MinimaList != null )
       {
-          LocalMinima tmpLm = m_MinimaList.Next;
+          var tmpLm = m_MinimaList.Next;
           m_MinimaList = null;
           m_MinimaList = tmpLm;
       }
@@ -275,14 +276,16 @@ public class PolyClipBase
     TEdge E2;
     for (;;)
     {
-      while (E.Bot != E.Prev.Bot || E.Curr == E.Top) E = E.Next;
-      if (E.Dx != horizontal && E.Prev.Dx != horizontal) break;
-      while (E.Prev.Dx == horizontal) E = E.Prev;
-      E2 = E;
-      while (E.Dx == horizontal) E = E.Next;
-      if (E.Top.Y == E.Prev.Bot.Y) continue; //ie just an intermediate horz.
-      if (E2.Prev.Bot.X < E.Bot.X) E = E2;
-      break;
+        // ReSharper disable CompareOfFloatsByEqualityOperator
+        while (E.Bot != E.Prev.Bot || E.Curr == E.Top) E = E.Next;
+        if (E.Dx != horizontal && E.Prev.Dx != horizontal) break;
+        while (E.Prev.Dx == horizontal) E = E.Prev;
+        E2 = E;
+        while (E.Dx == horizontal) E = E.Next;
+        if (E.Top.Y == E.Prev.Bot.Y) continue; //ie just an intermediate horz.
+        if (E2.Prev.Bot.X < E.Bot.X) E = E2;
+        // ReSharper restore CompareOfFloatsByEqualityOperator
+        break;
     }
     return E;
   }
@@ -295,8 +298,9 @@ public class PolyClipBase
 
     if (Result.OutIdx == Skip)
     {
-      //check if there are edges beyond the skip edge in the bound and if so
-      //create another LocMin and calling ProcessBound once more ...
+        //check if there are edges beyond the skip edge in the bound and if so
+        //create another LocMin and calling ProcessBound once more ...
+        // ReSharper disable CompareOfFloatsByEqualityOperator
       E = Result;
       if (LeftBoundIsForward)
       {
@@ -320,7 +324,7 @@ public class PolyClipBase
           E = Result.Next;
         else
           E = Result.Prev;
-        LocalMinima locMin = new LocalMinima();
+        var locMin = new LocalMinima();
         locMin.Next = null;
         locMin.Y = E.Bot.Y;
         locMin.LeftBound = null;
@@ -329,9 +333,12 @@ public class PolyClipBase
         Result = ProcessBound(E, LeftBoundIsForward);
         InsertLocalMinima(locMin);
       }
+      // ReSharper restore CompareOfFloatsByEqualityOperator
+
       return Result;
     }
 
+    // ReSharper disable CompareOfFloatsByEqualityOperator
     if (E.Dx == horizontal)
     {
       //We need to be careful with open paths because this may not be a
@@ -341,11 +348,11 @@ public class PolyClipBase
       else EStart = E.Next;
       if (EStart.Dx == horizontal) //ie an adjoining horizontal skip edge
       {
-      if (EStart.Bot.X != E.Bot.X && EStart.Top.X != E.Bot.X)
-          ReverseHorizontal(E);
+          if (EStart.Bot.X != E.Bot.X && EStart.Top.X != E.Bot.X)
+              ReverseHorizontal(E);
       }
       else if (EStart.Bot.X != E.Bot.X)
-      ReverseHorizontal(E);
+          ReverseHorizontal(E);
     }
 
     EStart = E;
@@ -396,6 +403,8 @@ public class PolyClipBase
         ReverseHorizontal(E);
       Result = Result.Prev; //move to the edge just beyond current bound
     }
+    // ReSharper restore CompareOfFloatsByEqualityOperator
+    
     return Result;
   }
   //------------------------------------------------------------------------------
@@ -423,16 +432,16 @@ public class PolyClipBase
     if (!Closed && polyType == PolyType.ptClip)
       throw new PolyClipException("AddPath: Open paths must be subject.");
 
-    int highI = (int)pg.Count - 1;
+    var highI = pg.Count - 1;
     if (Closed) while (highI > 0 && (pg[highI] == pg[0])) --highI;
     while (highI > 0 && (pg[highI] == pg[highI - 1])) --highI;
     if ((Closed && highI < 2) || (!Closed && highI < 1)) return false;
 
     //create a new edge array ...
-    List<TEdge> edges = new List<TEdge>(highI+1);
-    for (int i = 0; i <= highI; i++) edges.Add(new TEdge());
+    var edges = new List<TEdge>(highI+1);
+    for (var i = 0; i <= highI; i++) edges.Add(new TEdge());
         
-    bool IsFlat = true;
+    var IsFlat = true;
 
     //1. Basic (first) edge initialization ...
     edges[1].Curr = pg[1];
@@ -440,12 +449,12 @@ public class PolyClipBase
     RangeTest(pg[highI], ref m_UseFullRange);
     InitEdge(edges[0], edges[1], edges[highI], pg[0]);
     InitEdge(edges[highI], edges[0], edges[highI - 1], pg[highI]);
-    for (int i = highI - 1; i >= 1; --i)
+    for (var i = highI - 1; i >= 1; --i)
     {
       RangeTest(pg[i], ref m_UseFullRange);
       InitEdge(edges[i], edges[i + 1], edges[i - 1], pg[i]);
     }
-    TEdge eStart = edges[0];
+    var eStart = edges[0];
 
     //2. Remove duplicate vertices, and (when closed) collinear edges ...
     TEdge E = eStart, eLoopStop = eStart;
@@ -508,7 +517,7 @@ public class PolyClipBase
     {
       if (Closed) return false;
       E.Prev.OutIdx = Skip;
-      LocalMinima locMin = new LocalMinima();
+      var locMin = new LocalMinima();
       locMin.Next = null;
       locMin.Y = E.Bot.Y;
       locMin.LeftBound = null;
@@ -543,7 +552,7 @@ public class PolyClipBase
 
       //E and E.Prev now share a local minima (left aligned if horizontal).
       //Compare their slopes to find which starts which bound ...
-      LocalMinima locMin = new LocalMinima();
+      var locMin = new LocalMinima();
       locMin.Next = null;
       locMin.Y = E.Bot.Y;
       if (E.Dx < E.Prev.Dx) 
@@ -569,7 +578,7 @@ public class PolyClipBase
       E = ProcessBound(locMin.LeftBound, leftBoundIsForward);
       if (E.OutIdx == Skip) E = ProcessBound(E, leftBoundIsForward);
 
-      TEdge E2 = ProcessBound(locMin.RightBound, !leftBoundIsForward);
+      var E2 = ProcessBound(locMin.RightBound, !leftBoundIsForward);
       if (E2.OutIdx == Skip) E2 = ProcessBound(E2, !leftBoundIsForward);
 
       if (locMin.LeftBound.OutIdx == Skip)
@@ -602,8 +611,8 @@ public class PolyClipBase
   /// </exception>
   public bool AddPaths(Paths ppg, PolyType polyType, bool closed)
   {
-    bool result = false;
-    for (int i = 0; i < ppg.Count; ++i)
+    var result = false;
+    for (var i = 0; i < ppg.Count; ++i)
       if (AddPath(ppg[i], polyType, closed)) result = true;
     return result;
   }
@@ -622,7 +631,7 @@ public class PolyClipBase
     //removes e from double_linked_list (but without removing from memory)
     e.Prev.Next = e.Next;
     e.Next.Prev = e.Prev;
-    TEdge result = e.Next;
+    var result = e.Next;
     e.Prev = null; //flag as removed (see PolyClipBase.Clear)
     return result;
   }
@@ -649,7 +658,7 @@ public class PolyClipBase
       m_MinimaList = newLm;
     } else
     {
-      LocalMinima tmpLm = m_MinimaList;
+      var tmpLm = m_MinimaList;
       while( tmpLm.Next != null  && ( newLm.Y < tmpLm.Next.Y ) )
         tmpLm = tmpLm.Next;
       newLm.Next = tmpLm.Next;
@@ -686,11 +695,11 @@ public class PolyClipBase
 
     //reset all edges ...
     m_Scanbeam = null;
-    LocalMinima lm = m_MinimaList;
+    var lm = m_MinimaList;
     while (lm != null)
     {
       InsertScanbeam(lm.Y);
-      TEdge e = lm.LeftBound;
+      var e = lm.LeftBound;
       if (e != null)
       {
         e.Curr = e.Bot;
@@ -721,13 +730,13 @@ public class PolyClipBase
     int i = 0, cnt = paths.Count;
     while (i < cnt && paths[i].Count == 0) i++;
     if (i == cnt) return new IntRect(0,0,0,0);
-    IntRect result = new IntRect();
+    var result = new IntRect();
     result.left = paths[i][0].X;
     result.right = result.left;
     result.top = paths[i][0].Y;
     result.bottom = result.top;
     for (; i < cnt; i++)
-      for (int j = 0; j < paths[i].Count; j++)
+      for (var j = 0; j < paths[i].Count; j++)
       {
         if (paths[i][j].X < result.left) result.left = paths[i][j].X;
         else if (paths[i][j].X > result.right) result.right = paths[i][j].X;
@@ -749,17 +758,17 @@ public class PolyClipBase
       }
       else if (Y > m_Scanbeam.Y)
       {
-          Scanbeam newSb = new Scanbeam();
+          var newSb = new Scanbeam();
           newSb.Y = Y;
           newSb.Next = m_Scanbeam;
           m_Scanbeam = newSb;
       }
       else
       {
-          Scanbeam sb2 = m_Scanbeam;
+          var sb2 = m_Scanbeam;
           while (sb2.Next != null && (Y <= sb2.Next.Y)) sb2 = sb2.Next;
           if (Y == sb2.Y) return; //ie ignores duplicates
-          Scanbeam newSb = new Scanbeam();
+          var newSb = new Scanbeam();
           newSb.Y = Y;
           newSb.Next = sb2.Next;
           sb2.Next = newSb;
@@ -788,7 +797,7 @@ public class PolyClipBase
 
   internal OutRec CreateOutRec()
   {
-      OutRec result = new OutRec();
+      var result = new OutRec();
       result.Idx = Unassigned;
       result.IsHole = false;
       result.IsOpen = false;
@@ -804,8 +813,9 @@ public class PolyClipBase
 
   internal void DisposeOutRec(int index)
   {
-      OutRec outRec = m_PolyOuts[index];
+      var outRec = m_PolyOuts[index];
       outRec.Pts = null;
+      // ReSharper disable once RedundantAssignment
       outRec = null;
       m_PolyOuts[index] = null;
   }
@@ -815,8 +825,8 @@ public class PolyClipBase
   {
       if (e.NextInLML == null)
           throw new PolyClipException("UpdateEdgeIntoAEL: invalid call");
-      TEdge AelPrev = e.PrevInAEL;
-      TEdge AelNext = e.NextInAEL;
+      var AelPrev = e.PrevInAEL;
+      var AelNext = e.NextInAEL;
       e.NextInLML.OutIdx = e.OutIdx;
       if (AelPrev != null)
           AelPrev.NextInAEL = e.NextInLML;
@@ -843,10 +853,10 @@ public class PolyClipBase
 
       if (edge1.NextInAEL == edge2)
       {
-          TEdge next = edge2.NextInAEL;
+          var next = edge2.NextInAEL;
           if (next != null)
               next.PrevInAEL = edge1;
-          TEdge prev = edge1.PrevInAEL;
+          var prev = edge1.PrevInAEL;
           if (prev != null)
               prev.NextInAEL = edge2;
           edge2.PrevInAEL = prev;
@@ -856,10 +866,10 @@ public class PolyClipBase
       }
       else if (edge2.NextInAEL == edge1)
       {
-          TEdge next = edge1.NextInAEL;
+          var next = edge1.NextInAEL;
           if (next != null)
               next.PrevInAEL = edge2;
-          TEdge prev = edge2.PrevInAEL;
+          var prev = edge2.PrevInAEL;
           if (prev != null)
               prev.NextInAEL = edge1;
           edge1.PrevInAEL = prev;
@@ -869,8 +879,8 @@ public class PolyClipBase
       }
       else
       {
-          TEdge next = edge1.NextInAEL;
-          TEdge prev = edge1.PrevInAEL;
+          var next = edge1.NextInAEL;
+          var prev = edge1.PrevInAEL;
           edge1.NextInAEL = edge2.NextInAEL;
           if (edge1.NextInAEL != null)
               edge1.NextInAEL.PrevInAEL = edge1;
@@ -894,8 +904,8 @@ public class PolyClipBase
 
   internal void DeleteFromAEL(TEdge e)
   {
-      TEdge AelPrev = e.PrevInAEL;
-      TEdge AelNext = e.NextInAEL;
+      var AelPrev = e.PrevInAEL;
+      var AelNext = e.NextInAEL;
       if (AelPrev == null && AelNext == null && (e != m_ActiveEdges))
           return; //already deleted
       if (AelPrev != null)

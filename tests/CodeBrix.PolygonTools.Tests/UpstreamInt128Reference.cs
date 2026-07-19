@@ -92,7 +92,7 @@ internal struct UpstreamInt128
   {
     if (obj == null || !(obj is UpstreamInt128))
       return false;
-    UpstreamInt128 i128 = (UpstreamInt128)obj;
+    var i128 = (UpstreamInt128)obj;
     return (i128.hi == hi && i128.lo == lo);
   }
 
@@ -144,12 +144,12 @@ internal struct UpstreamInt128
     if (val.hi < 0)
     {
       if (val.lo == 0)
-        return (double)val.hi * shift64;
+        return val.hi * shift64;
       else
-        return -(double)(~val.lo + ~val.hi * shift64);
+        return -(~val.lo + ~val.hi * shift64);
     }
     else
-      return (double)(val.lo + val.hi * shift64);
+      return val.lo + val.hi * shift64;
   }
 
   //nb: Constructing two new Int128 objects every time we want to multiply longs
@@ -158,18 +158,18 @@ internal struct UpstreamInt128
 
   public static UpstreamInt128 Int128Mul(Int64 lhs, Int64 rhs)
   {
-    bool negate = (lhs < 0) != (rhs < 0);
+    var negate = (lhs < 0) != (rhs < 0);
     if (lhs < 0) lhs = -lhs;
     if (rhs < 0) rhs = -rhs;
-    UInt64 int1Hi = (UInt64)lhs >> 32;
-    UInt64 int1Lo = (UInt64)lhs & 0xFFFFFFFF;
-    UInt64 int2Hi = (UInt64)rhs >> 32;
-    UInt64 int2Lo = (UInt64)rhs & 0xFFFFFFFF;
+    var int1Hi = (UInt64)lhs >> 32;
+    var int1Lo = (UInt64)lhs & 0xFFFFFFFF;
+    var int2Hi = (UInt64)rhs >> 32;
+    var int2Lo = (UInt64)rhs & 0xFFFFFFFF;
 
     //nb: see comments in clipper.pas
-    UInt64 a = int1Hi * int2Hi;
-    UInt64 b = int1Lo * int2Lo;
-    UInt64 c = int1Hi * int2Lo + int1Lo * int2Hi;
+    var a = int1Hi * int2Hi;
+    var b = int1Lo * int2Lo;
+    var c = int1Hi * int2Lo + int1Lo * int2Hi;
 
     UInt64 lo;
     Int64 hi;
@@ -177,7 +177,7 @@ internal struct UpstreamInt128
 
     unchecked { lo = (c << 32) + b; }
     if (lo < b) hi++;
-    UpstreamInt128 result = new UpstreamInt128(hi, lo);
+    var result = new UpstreamInt128(hi, lo);
     return negate ? -result : result;
   }
 };

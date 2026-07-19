@@ -31,13 +31,18 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
 using CodeBrix.PolygonTools.Enumerations;
 using CodeBrix.PolygonTools.Internal;
 using CodeBrix.PolygonTools.Models;
+using System;
+using System.Collections.Generic;
 using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
+
+// ReSharper disable UnusedMember.Local
+// ReSharper disable RedundantIfElseBlock
+// ReSharper disable RedundantBaseConstructorCall
+// ReSharper disable InconsistentNaming
 
 namespace CodeBrix.PolygonTools; //was previously: ClipperLib;
 
@@ -109,7 +114,7 @@ public class PolyClip : PolyClipBase
     private void InsertMaxima(long X)
     {
         //double-linked list: sorted ascending, ignoring dups.
-        Maxima newMax = new Maxima();
+        var newMax = new Maxima();
         newMax.X = X;
         if (m_Maxima == null)
         {
@@ -125,7 +130,7 @@ public class PolyClip : PolyClipBase
         }
         else
         {
-            Maxima m = m_Maxima;
+            var m = m_Maxima;
             while (m.Next != null && (X >= m.Next.X)) m = m.Next;
             if (X == m.X) return; //ie ignores duplicates (& CG to clean up newMax)
             //insert newMax between m and m.Next ...
@@ -278,7 +283,7 @@ public class PolyClip : PolyClipBase
             (outRec.IsHole != outRec.FirstLeft.IsHole &&
             outRec.FirstLeft.Pts != null)) return;
 
-      OutRec orfl = outRec.FirstLeft;
+      var orfl = outRec.FirstLeft;
       while (orfl != null && ((orfl.IsHole == outRec.IsHole) || orfl.Pts == null))
         orfl = orfl.FirstLeft;
       outRec.FirstLeft = orfl;
@@ -307,7 +312,7 @@ public class PolyClip : PolyClipBase
         } 
 
         //fix orientations ...
-        foreach (OutRec outRec in m_PolyOuts)
+        foreach (var outRec in m_PolyOuts)
         {
           if (outRec.Pts == null || outRec.IsOpen) continue;
           if ((outRec.IsHole ^ ReverseSolution) == (Area(outRec) > 0))
@@ -316,14 +321,21 @@ public class PolyClip : PolyClipBase
 
         JoinCommonEdges();
 
-        foreach (OutRec outRec in m_PolyOuts)
+        foreach (var outRec in m_PolyOuts)
         {
-          if (outRec.Pts == null) 
-              continue;
-          else if (outRec.IsOpen)
-              FixupOutPolyline(outRec);
-          else
-              FixupOutPolygon(outRec);
+            switch (outRec.Pts)
+            {
+                case null:
+                    continue;
+                default:
+                {
+                    if (outRec.IsOpen)
+                        FixupOutPolyline(outRec);
+                    else
+                        FixupOutPolygon(outRec);
+                    break;
+                }
+            }
         }
 
         if (StrictlySimple) DoSimplePolygons();
@@ -339,14 +351,14 @@ public class PolyClip : PolyClipBase
     //------------------------------------------------------------------------------
 
     private void DisposeAllPolyPts(){
-      for (int i = 0; i < m_PolyOuts.Count; ++i) DisposeOutRec(i);
+      for (var i = 0; i < m_PolyOuts.Count; ++i) DisposeOutRec(i);
       m_PolyOuts.Clear();
     }
     //------------------------------------------------------------------------------
 
     private void AddJoin(OutPt Op1, OutPt Op2, IntPoint OffPt)
     {
-      Join j = new Join();
+      var j = new Join();
       j.OutPt1 = Op1;
       j.OutPt2 = Op2;
       j.OffPt = OffPt;
@@ -356,7 +368,7 @@ public class PolyClip : PolyClipBase
 
     private void AddGhostJoin(OutPt Op, IntPoint OffPt)
     {
-      Join j = new Join();
+      var j = new Join();
       j.OutPt1 = Op;
       j.OffPt = OffPt;
       m_GhostJoins.Add(j);
@@ -369,8 +381,8 @@ public class PolyClip : PolyClipBase
       LocalMinima lm;
       while (PopLocalMinima(botY, out lm))
       {
-        TEdge lb = lm.LeftBound;
-        TEdge rb = lm.RightBound;
+        var lb = lm.LeftBound;
+        var rb = lm.RightBound;
 
         OutPt Op1 = null;
         if (lb == null)
@@ -418,11 +430,11 @@ public class PolyClip : PolyClipBase
         if (Op1 != null && IsHorizontal(rb) && 
           m_GhostJoins.Count > 0 && rb.WindDelta != 0)
         {
-          for (int i = 0; i < m_GhostJoins.Count; i++)
+          for (var i = 0; i < m_GhostJoins.Count; i++)
           {
             //if the horizontal Rb and a 'ghost' horizontal overlap, then convert
             //the 'ghost' join to a real join ready for later ...
-            Join j = m_GhostJoins[i];
+            var j = m_GhostJoins[i];
             if (HorzSegmentsOverlap(j.OutPt1.Pt.X, j.OffPt.X, rb.Bot.X, rb.Top.X))
               AddJoin(j.OutPt1, Op1, j.OffPt);
           }
@@ -434,7 +446,7 @@ public class PolyClip : PolyClipBase
           SlopesEqual(lb.PrevInAEL.Curr, lb.PrevInAEL.Top, lb.Curr, lb.Top, m_UseFullRange) &&
           lb.WindDelta != 0 && lb.PrevInAEL.WindDelta != 0)
         {
-          OutPt Op2 = AddOutPt(lb.PrevInAEL, lb.Bot);
+          var Op2 = AddOutPt(lb.PrevInAEL, lb.Bot);
           AddJoin(Op1, Op2, lb.Top);
         }
 
@@ -445,11 +457,11 @@ public class PolyClip : PolyClipBase
             SlopesEqual(rb.PrevInAEL.Curr, rb.PrevInAEL.Top, rb.Curr, rb.Top, m_UseFullRange) &&
             rb.WindDelta != 0 && rb.PrevInAEL.WindDelta != 0)
           {
-            OutPt Op2 = AddOutPt(rb.PrevInAEL, rb.Bot);
+            var Op2 = AddOutPt(rb.PrevInAEL, rb.Bot);
             AddJoin(Op1, Op2, rb.Top);
           }
 
-          TEdge e = lb.NextInAEL;
+          var e = lb.NextInAEL;
           if (e != null)
             while (e != rb)
             {
@@ -613,7 +625,8 @@ public class PolyClip : PolyClipBase
                     return (edge.WindCnt2 >= 0);
                 }
               else
-                return true;
+                  // ReSharper disable once DuplicatedStatements
+                  return true;
         }
         return true;
     }
@@ -621,7 +634,7 @@ public class PolyClip : PolyClipBase
 
     private void SetWindingCount(TEdge edge)
     {
-      TEdge e = edge.PrevInAEL;
+      var e = edge.PrevInAEL;
       //find the edge of the same polytype that immediately preceeds 'edge' in AEL
       while (e != null && ((e.PolyTyp != edge.PolyTyp) || (e.WindDelta == 0))) e = e.PrevInAEL;
       if (e == null)
@@ -645,8 +658,8 @@ public class PolyClip : PolyClipBase
         if (edge.WindDelta == 0)
         {
           //are we inside a subj polygon ...
-          bool Inside = true;
-          TEdge e2 = e.PrevInAEL;
+          var Inside = true;
+          var e2 = e.PrevInAEL;
           while (e2 != null)
           {
             if (e2.PolyTyp == e.PolyTyp && e2.WindDelta != 0)
@@ -746,7 +759,7 @@ public class PolyClip : PolyClipBase
       //Pop edge from front of SEL (ie SEL is a FILO list)
       e = m_SortedEdges;
       if (e == null) return false;
-      TEdge oldE = e;
+      var oldE = e;
       m_SortedEdges = e.NextInSEL;
       if (m_SortedEdges != null) m_SortedEdges.PrevInSEL = null;
       oldE.NextInSEL = null;
@@ -757,7 +770,7 @@ public class PolyClip : PolyClipBase
    
     private void CopyAELToSEL()
     {
-        TEdge e = m_ActiveEdges;
+        var e = m_ActiveEdges;
         m_SortedEdges = e;
         while (e != null)
         {
@@ -777,10 +790,10 @@ public class PolyClip : PolyClipBase
 
         if (edge1.NextInSEL == edge2)
         {
-            TEdge next = edge2.NextInSEL;
+            var next = edge2.NextInSEL;
             if (next != null)
                 next.PrevInSEL = edge1;
-            TEdge prev = edge1.PrevInSEL;
+            var prev = edge1.PrevInSEL;
             if (prev != null)
                 prev.NextInSEL = edge2;
             edge2.PrevInSEL = prev;
@@ -790,10 +803,10 @@ public class PolyClip : PolyClipBase
         }
         else if (edge2.NextInSEL == edge1)
         {
-            TEdge next = edge1.NextInSEL;
+            var next = edge1.NextInSEL;
             if (next != null)
                 next.PrevInSEL = edge2;
-            TEdge prev = edge2.PrevInSEL;
+            var prev = edge2.PrevInSEL;
             if (prev != null)
                 prev.NextInSEL = edge1;
             edge1.PrevInSEL = prev;
@@ -803,8 +816,8 @@ public class PolyClip : PolyClipBase
         }
         else
         {
-            TEdge next = edge1.NextInSEL;
-            TEdge prev = edge1.PrevInSEL;
+            var next = edge1.NextInSEL;
+            var prev = edge1.PrevInSEL;
             edge1.NextInSEL = edge2.NextInSEL;
             if (edge1.NextInSEL != null)
                 edge1.NextInSEL.PrevInSEL = edge1;
@@ -874,12 +887,12 @@ public class PolyClip : PolyClipBase
 
       if (prevE != null && prevE.OutIdx >= 0 && prevE.Top.Y < pt.Y && e.Top.Y < pt.Y)
       {
-        long xPrev = TopX(prevE, pt.Y);
-        long xE = TopX(e, pt.Y);
+        var xPrev = TopX(prevE, pt.Y);
+        var xE = TopX(e, pt.Y);
         if ((xPrev == xE) && (e.WindDelta != 0) && (prevE.WindDelta != 0) &&
           SlopesEqual(new IntPoint(xPrev, pt.Y), prevE.Top, new IntPoint(xE, pt.Y), e.Top, m_UseFullRange))
         {
-          OutPt outPt = AddOutPt(prevE, pt);
+          var outPt = AddOutPt(prevE, pt);
           AddJoin(result, outPt, e.Top);
         }
       }
@@ -891,9 +904,9 @@ public class PolyClip : PolyClipBase
     {
         if (e.OutIdx < 0)
         {
-            OutRec outRec = CreateOutRec();
+            var outRec = CreateOutRec();
             outRec.IsOpen = (e.WindDelta == 0);
-            OutPt newOp = new OutPt();
+            var newOp = new OutPt();
             outRec.Pts = newOp;
             newOp.Idx = outRec.Idx;
             newOp.Pt = pt;
@@ -906,14 +919,14 @@ public class PolyClip : PolyClipBase
         }
         else
         {
-            OutRec outRec = m_PolyOuts[e.OutIdx];
+            var outRec = m_PolyOuts[e.OutIdx];
             //OutRec.Pts is the 'Left-most' point & OutRec.Pts.Prev is the 'Right-most'
-            OutPt op = outRec.Pts;
-            bool ToFront = (e.Side == EdgeSide.esLeft);
+            var op = outRec.Pts;
+            var ToFront = (e.Side == EdgeSide.esLeft);
             if (ToFront && pt == op.Pt) return op;
             else if (!ToFront && pt == op.Prev.Pt) return op.Prev;
 
-            OutPt newOp = new OutPt();
+            var newOp = new OutPt();
             newOp.Idx = outRec.Idx;
             newOp.Pt = pt;
             newOp.Next = op;
@@ -928,7 +941,7 @@ public class PolyClip : PolyClipBase
 
     private OutPt GetLastOutPt(TEdge e)
     {
-      OutRec outRec = m_PolyOuts[e.OutIdx];
+      var outRec = m_PolyOuts[e.OutIdx];
       if (e.Side == EdgeSide.esLeft) 
           return outRec.Pts;
       else
@@ -938,7 +951,7 @@ public class PolyClip : PolyClipBase
 
     internal void SwapPoints(ref IntPoint pt1, ref IntPoint pt2)
     {
-        IntPoint tmp = new IntPoint(pt1);
+        var tmp = new IntPoint(pt1);
         pt1 = pt2;
         pt2 = tmp;
     }
@@ -954,7 +967,7 @@ public class PolyClip : PolyClipBase
 
     private void SetHoleState(TEdge e, OutRec outRec)
     {
-      TEdge e2 = e.PrevInAEL;
+      var e2 = e.PrevInAEL;
       TEdge eTmp = null;  
       while (e2 != null)
         {
@@ -990,32 +1003,34 @@ public class PolyClip : PolyClipBase
 
     private bool FirstIsBottomPt(OutPt btmPt1, OutPt btmPt2)
     {
-      OutPt p = btmPt1.Prev;
+      var p = btmPt1.Prev;
       while ((p.Pt == btmPt1.Pt) && (p != btmPt1)) p = p.Prev;
-      double dx1p = Math.Abs(GetDx(btmPt1.Pt, p.Pt));
+      var dx1p = Math.Abs(GetDx(btmPt1.Pt, p.Pt));
       p = btmPt1.Next;
       while ((p.Pt == btmPt1.Pt) && (p != btmPt1)) p = p.Next;
-      double dx1n = Math.Abs(GetDx(btmPt1.Pt, p.Pt));
+      var dx1n = Math.Abs(GetDx(btmPt1.Pt, p.Pt));
 
       p = btmPt2.Prev;
       while ((p.Pt == btmPt2.Pt) && (p != btmPt2)) p = p.Prev;
-      double dx2p = Math.Abs(GetDx(btmPt2.Pt, p.Pt));
+      var dx2p = Math.Abs(GetDx(btmPt2.Pt, p.Pt));
       p = btmPt2.Next;
       while ((p.Pt == btmPt2.Pt) && (p != btmPt2)) p = p.Next;
-      double dx2n = Math.Abs(GetDx(btmPt2.Pt, p.Pt));
+      var dx2n = Math.Abs(GetDx(btmPt2.Pt, p.Pt));
 
+      // ReSharper disable CompareOfFloatsByEqualityOperator
       if (Math.Max(dx1p, dx1n) == Math.Max(dx2p, dx2n) &&
-        Math.Min(dx1p, dx1n) == Math.Min(dx2p, dx2n))
-        return Area(btmPt1) > 0; //if otherwise identical use orientation
+          Math.Min(dx1p, dx1n) == Math.Min(dx2p, dx2n))
+          return Area(btmPt1) > 0; //if otherwise identical use orientation
       else
         return (dx1p >= dx2p && dx1p >= dx2n) || (dx1n >= dx2p && dx1n >= dx2n);
+      // ReSharper restore CompareOfFloatsByEqualityOperator
     }
     //------------------------------------------------------------------------------
 
     private OutPt GetBottomPt(OutPt pp)
     {
       OutPt dups = null;
-      OutPt p = pp.Next;
+      var p = pp.Next;
       while (p != pp)
       {
         if (p.Pt.Y > pp.Pt.Y)
@@ -1057,8 +1072,8 @@ public class PolyClip : PolyClipBase
             outRec1.BottomPt = GetBottomPt(outRec1.Pts);
         if (outRec2.BottomPt == null) 
             outRec2.BottomPt = GetBottomPt(outRec2.Pts);
-        OutPt bPt1 = outRec1.BottomPt;
-        OutPt bPt2 = outRec2.BottomPt;
+        var bPt1 = outRec1.BottomPt;
+        var bPt2 = outRec2.BottomPt;
         if (bPt1.Pt.Y > bPt2.Pt.Y) return outRec1;
         else if (bPt1.Pt.Y < bPt2.Pt.Y) return outRec2;
         else if (bPt1.Pt.X < bPt2.Pt.X) return outRec1;
@@ -1083,7 +1098,7 @@ public class PolyClip : PolyClipBase
 
     private OutRec GetOutRec(int idx)
     {
-      OutRec outrec = m_PolyOuts[idx];
+      var outrec = m_PolyOuts[idx];
       while (outrec != m_PolyOuts[outrec.Idx])
         outrec = m_PolyOuts[outrec.Idx];
       return outrec;
@@ -1092,8 +1107,8 @@ public class PolyClip : PolyClipBase
 
     private void AppendPolygon(TEdge e1, TEdge e2)
     {
-      OutRec outRec1 = m_PolyOuts[e1.OutIdx];
-      OutRec outRec2 = m_PolyOuts[e2.OutIdx];
+      var outRec1 = m_PolyOuts[e1.OutIdx];
+      var outRec2 = m_PolyOuts[e2.OutIdx];
 
       OutRec holeStateRec;
       if (OutRec1RightOfOutRec2(outRec1, outRec2)) 
@@ -1105,10 +1120,10 @@ public class PolyClip : PolyClipBase
 
       //get the start and ends of both output polygons and
       //join E2 poly onto E1 poly and delete pointers to E2 ...
-      OutPt p1_lft = outRec1.Pts;
-      OutPt p1_rt = p1_lft.Prev;
-      OutPt p2_lft = outRec2.Pts;
-      OutPt p2_rt = p2_lft.Prev;
+      var p1_lft = outRec1.Pts;
+      var p1_rt = p1_lft.Prev;
+      var p2_lft = outRec2.Pts;
+      var p2_rt = p2_lft.Prev;
 
       //join e2 poly onto e1 poly and delete pointers to e2 ...
       if(  e1.Side == EdgeSide.esLeft )
@@ -1163,13 +1178,13 @@ public class PolyClip : PolyClipBase
 
       outRec2.FirstLeft = outRec1;
 
-      int OKIdx = e1.OutIdx;
-      int ObsoleteIdx = e2.OutIdx;
+      var OKIdx = e1.OutIdx;
+      var ObsoleteIdx = e2.OutIdx;
 
       e1.OutIdx = Unassigned; //nb: safe because we only get here via AddLocalMaxPoly
       e2.OutIdx = Unassigned;
 
-      TEdge e = m_ActiveEdges;
+      var e = m_ActiveEdges;
       while( e != null )
       {
         if( e.OutIdx == ObsoleteIdx )
@@ -1202,7 +1217,7 @@ public class PolyClip : PolyClipBase
 
     private static void SwapSides(TEdge edge1, TEdge edge2)
     {
-        EdgeSide side = edge1.Side;
+        var side = edge1.Side;
         edge1.Side = edge2.Side;
         edge2.Side = side;
     }
@@ -1210,7 +1225,7 @@ public class PolyClip : PolyClipBase
 
     private static void SwapPolyIndexes(TEdge edge1, TEdge edge2)
     {
-        int outIdx = edge1.OutIdx;
+        var outIdx = edge1.OutIdx;
         edge1.OutIdx = edge2.OutIdx;
         edge2.OutIdx = outIdx;
     }
@@ -1221,8 +1236,8 @@ public class PolyClip : PolyClipBase
         //e1 will be to the left of e2 BELOW the intersection. Therefore e1 is before
         //e2 in AEL except when e1 is being inserted at the intersection point ...
 
-      bool e1Contributing = (e1.OutIdx >= 0);
-      bool e2Contributing = (e2.OutIdx >= 0);
+      var e1Contributing = (e1.OutIdx >= 0);
+      var e2Contributing = (e2.OutIdx >= 0);
 
 
         //if either edge is on an OPEN path ...
@@ -1230,6 +1245,7 @@ public class PolyClip : PolyClipBase
         {
           //ignore subject-subject open path intersections UNLESS they
           //are both open paths, AND they are both 'contributing maximas' ...
+          // ReSharper disable once RedundantJumpStatement
           if (e1.WindDelta == 0 && e2.WindDelta == 0) return;
           //if intersecting a subj line with a subj poly ...
           else if (e1.PolyTyp == e2.PolyTyp && 
@@ -1276,7 +1292,7 @@ public class PolyClip : PolyClipBase
         {
             if (IsEvenOddFillType(e1))
             {
-                int oldE1WindCnt = e1.WindCnt;
+                var oldE1WindCnt = e1.WindCnt;
                 e1.WindCnt = e2.WindCnt;
                 e2.WindCnt = oldE1WindCnt;
             }
@@ -1401,7 +1417,7 @@ public class PolyClip : PolyClipBase
                 case ClipType.ctDifference:
                   if (((e1.PolyTyp == PolyType.ptClip) && (e1Wc2 > 0) && (e2Wc2 > 0)) ||
                       ((e1.PolyTyp == PolyType.ptSubject) && (e1Wc2 <= 0) && (e2Wc2 <= 0)))
-                        AddLocalMinPoly(e1, e2, pt);
+                      AddLocalMinPoly(e1, e2, pt);
                   break;
                 case ClipType.ctXor:
                   AddLocalMinPoly(e1, e2, pt);
@@ -1415,8 +1431,8 @@ public class PolyClip : PolyClipBase
 
     private void DeleteFromSEL(TEdge e)
     {
-        TEdge SelPrev = e.PrevInSEL;
-        TEdge SelNext = e.NextInSEL;
+        var SelPrev = e.PrevInSEL;
+        var SelNext = e.NextInSEL;
         if (SelPrev == null && SelNext == null && (e != m_SortedEdges))
             return; //already deleted
         if (SelPrev != null)
@@ -1457,7 +1473,7 @@ public class PolyClip : PolyClipBase
     {
       Direction dir;
       long horzLeft, horzRight;
-      bool IsOpen = horzEdge.WindDelta == 0;
+      var IsOpen = horzEdge.WindDelta == 0;
 
       GetHorzDirection(horzEdge, out dir, out horzLeft, out horzRight);
 
@@ -1467,7 +1483,7 @@ public class PolyClip : PolyClipBase
       if (eLastHorz.NextInLML == null)
         eMaxPair = GetMaximaPair(eLastHorz);
 
-      Maxima currMax = m_Maxima;
+      var currMax = m_Maxima;
       if (currMax != null)
       {
           //get the first maxima in range (X) ...
@@ -1489,8 +1505,8 @@ public class PolyClip : PolyClipBase
       OutPt op1 = null;
       for (;;) //loop through consec. horizontal edges
       {
-        bool IsLastHorz = (horzEdge == eLastHorz);
-        TEdge e = GetNextInAEL(horzEdge, dir);
+        var IsLastHorz = (horzEdge == eLastHorz);
+        var e = GetNextInAEL(horzEdge, dir);
         while(e != null)
         {
 
@@ -1514,10 +1530,10 @@ public class PolyClip : PolyClipBase
                     {
                         if (horzEdge.OutIdx >= 0 && !IsOpen)
                           AddOutPt(horzEdge, new IntPoint(currMax.X, horzEdge.Bot.Y));
-                      currMax = currMax.Prev;
+                        currMax = currMax.Prev;
                     }
                 }
-            };
+            }
 
             if ((dir == Direction.dLeftToRight && e.Curr.X > horzRight) ||
               (dir == Direction.dRightToLeft && e.Curr.X < horzLeft)) break;
@@ -1531,14 +1547,14 @@ public class PolyClip : PolyClipBase
             {
 
                 op1 = AddOutPt(horzEdge, e.Curr);
-                TEdge eNextHorz = m_SortedEdges;
+                var eNextHorz = m_SortedEdges;
                 while (eNextHorz != null)
                 {
                     if (eNextHorz.OutIdx >= 0 &&
                       HorzSegmentsOverlap(horzEdge.Bot.X,
                       horzEdge.Top.X, eNextHorz.Bot.X, eNextHorz.Top.X))
                     {
-                        OutPt op2 = GetLastOutPt(eNextHorz);
+                        var op2 = GetLastOutPt(eNextHorz);
                         AddJoin(op2, op1, eNextHorz.Top);
                     }
                     eNextHorz = eNextHorz.NextInSEL;
@@ -1559,15 +1575,15 @@ public class PolyClip : PolyClipBase
             
             if(dir == Direction.dLeftToRight)
             {
-              IntPoint Pt = new IntPoint(e.Curr.X, horzEdge.Curr.Y);
+              var Pt = new IntPoint(e.Curr.X, horzEdge.Curr.Y);
               IntersectEdges(horzEdge, e, Pt);
             }
             else
             {
-              IntPoint Pt = new IntPoint(e.Curr.X, horzEdge.Curr.Y);
+              var Pt = new IntPoint(e.Curr.X, horzEdge.Curr.Y);
               IntersectEdges(e, horzEdge, Pt);
             }
-            TEdge eNext = GetNextInAEL(e, dir);
+            var eNext = GetNextInAEL(e, dir);
             SwapPositionsInAEL(horzEdge, e);
             e = eNext;
         } //end while(e != null)
@@ -1584,14 +1600,14 @@ public class PolyClip : PolyClipBase
       if (horzEdge.OutIdx >= 0 && op1 == null)
       {
           op1 = GetLastOutPt(horzEdge);
-          TEdge eNextHorz = m_SortedEdges;
+          var eNextHorz = m_SortedEdges;
           while (eNextHorz != null)
           {
               if (eNextHorz.OutIdx >= 0 &&
                 HorzSegmentsOverlap(horzEdge.Bot.X,
                 horzEdge.Top.X, eNextHorz.Bot.X, eNextHorz.Top.X))
               {
-                  OutPt op2 = GetLastOutPt(eNextHorz);
+                  var op2 = GetLastOutPt(eNextHorz);
                   AddJoin(op2, op1, eNextHorz.Top);
               }
               eNextHorz = eNextHorz.NextInSEL;
@@ -1608,14 +1624,14 @@ public class PolyClip : PolyClipBase
           UpdateEdgeIntoAEL(ref horzEdge);
           if (horzEdge.WindDelta == 0) return;
           //nb: HorzEdge is no longer horizontal here
-          TEdge ePrev = horzEdge.PrevInAEL;
-          TEdge eNext = horzEdge.NextInAEL;
+          var ePrev = horzEdge.PrevInAEL;
+          var eNext = horzEdge.NextInAEL;
           if (ePrev != null && ePrev.Curr.X == horzEdge.Bot.X &&
             ePrev.Curr.Y == horzEdge.Bot.Y && ePrev.WindDelta != 0 &&
             (ePrev.OutIdx >= 0 && ePrev.Curr.Y > ePrev.Top.Y &&
             SlopesEqual(horzEdge, ePrev, m_UseFullRange)))
           {
-            OutPt op2 = AddOutPt(ePrev, horzEdge.Bot);
+            var op2 = AddOutPt(ePrev, horzEdge.Bot);
             AddJoin(op1, op2, horzEdge.Top);
           }
           else if (eNext != null && eNext.Curr.X == horzEdge.Bot.X &&
@@ -1623,7 +1639,7 @@ public class PolyClip : PolyClipBase
             eNext.OutIdx >= 0 && eNext.Curr.Y > eNext.Top.Y &&
             SlopesEqual(horzEdge, eNext, m_UseFullRange))
           {
-            OutPt op2 = AddOutPt(eNext, horzEdge.Bot);
+            var op2 = AddOutPt(eNext, horzEdge.Bot);
             AddJoin(op1, op2, horzEdge.Top);
           }
         }
@@ -1638,29 +1654,21 @@ public class PolyClip : PolyClipBase
     }
     //------------------------------------------------------------------------------
 
-    private TEdge GetNextInAEL(TEdge e, Direction Direction)
-    {
-        return Direction == Direction.dLeftToRight ? e.NextInAEL: e.PrevInAEL;
-    }
+    private TEdge GetNextInAEL(TEdge e, Direction Direction) => Direction == Direction.dLeftToRight ? e.NextInAEL: e.PrevInAEL;
     //------------------------------------------------------------------------------
 
-    private bool IsMinima(TEdge e)
-    {
-        return e != null && (e.Prev.NextInLML != e) && (e.Next.NextInLML != e);
-    }
+    private bool IsMinima(TEdge e) => e != null && (e.Prev.NextInLML != e) && (e.Next.NextInLML != e);
     //------------------------------------------------------------------------------
 
-    private bool IsMaxima(TEdge e, double Y)
-    {
-        return (e != null && e.Top.Y == Y && e.NextInLML == null);
-    }
+    // ReSharper disable CompareOfFloatsByEqualityOperator
+
+    private bool IsMaxima(TEdge e, double Y) => (e != null && e.Top.Y == Y && e.NextInLML == null);
     //------------------------------------------------------------------------------
 
-    private bool IsIntermediate(TEdge e, double Y)
-    {
-        return (e.Top.Y == Y && e.NextInLML != null);
-    }
+    private bool IsIntermediate(TEdge e, double Y) => (e.Top.Y == Y && e.NextInLML != null);
     //------------------------------------------------------------------------------
+
+    // ReSharper restore CompareOfFloatsByEqualityOperator
 
     internal TEdge GetMaximaPair(TEdge e)
     {
@@ -1669,14 +1677,14 @@ public class PolyClip : PolyClipBase
       else if ((e.Prev.Top == e.Top) && e.Prev.NextInLML == null)
         return e.Prev;
       else 
-					return null;
+          return null;
     }
     //------------------------------------------------------------------------------
 
     internal TEdge GetMaximaPairEx(TEdge e)
     {
       //as above but returns null if MaxPair isn't in AEL (unless it's horizontal)
-      TEdge result = GetMaximaPair(e);
+      var result = GetMaximaPair(e);
       if (result == null || result.OutIdx == Skip ||
         ((result.NextInAEL == result.PrevInAEL) && !IsHorizontal(result))) return null;
       return result;
@@ -1709,7 +1717,7 @@ public class PolyClip : PolyClipBase
       if ( m_ActiveEdges == null ) return;
 
       //prepare for sorting ...
-      TEdge e = m_ActiveEdges;
+      var e = m_ActiveEdges;
       m_SortedEdges = e;
       while( e != null )
       {
@@ -1720,21 +1728,21 @@ public class PolyClip : PolyClipBase
       }
 
       //bubblesort ...
-      bool isModified = true;
+      var isModified = true;
       while( isModified && m_SortedEdges != null )
       {
         isModified = false;
         e = m_SortedEdges;
         while( e.NextInSEL != null )
         {
-          TEdge eNext = e.NextInSEL;
+          var eNext = e.NextInSEL;
           IntPoint pt;
           if (e.Curr.X > eNext.Curr.X)
           {
               IntersectPoint(e, eNext, out pt);
               if (pt.Y < topY)
                 pt = new IntPoint(TopX(e, topY), topY);
-              IntersectNode newNode = new IntersectNode();
+              var newNode = new IntersectNode();
               newNode.Edge1 = e;
               newNode.Edge2 = eNext;
               newNode.Pt = pt;
@@ -1776,16 +1784,16 @@ public class PolyClip : PolyClipBase
       m_IntersectList.Sort(m_IntersectNodeComparer);
 
       CopyAELToSEL();
-      int cnt = m_IntersectList.Count;
-      for (int i = 0; i < cnt; i++)
+      var cnt = m_IntersectList.Count;
+      for (var i = 0; i < cnt; i++)
       {
         if (!EdgesAdjacent(m_IntersectList[i]))
         {
-          int j = i + 1;
+          var j = i + 1;
           while (j < cnt && !EdgesAdjacent(m_IntersectList[j])) j++;
           if (j == cnt) return false;
 
-          IntersectNode tmp = m_IntersectList[i];
+          var tmp = m_IntersectList[i];
           m_IntersectList[i] = m_IntersectList[j];
           m_IntersectList[j] = tmp;
 
@@ -1798,9 +1806,9 @@ public class PolyClip : PolyClipBase
 
     private void ProcessIntersectList()
     {
-      for (int i = 0; i < m_IntersectList.Count; i++)
+      for (var i = 0; i < m_IntersectList.Count; i++)
       {
-        IntersectNode iNode = m_IntersectList[i];
+        var iNode = m_IntersectList[i];
         {
           IntersectEdges(iNode.Edge1, iNode.Edge2, iNode.Pt);
           SwapPositionsInAEL(iNode.Edge1, iNode.Edge2);
@@ -1830,6 +1838,7 @@ public class PolyClip : PolyClipBase
       double b1, b2;
       //nb: with very large coordinate values, it's possible for SlopesEqual() to 
       //return false but for the edge.Dx value be equal due to double precision rounding.
+      // ReSharper disable once CompareOfFloatsByEqualityOperator
       if (edge1.Dx == edge2.Dx)
       {
         ip.Y = edge1.Curr.Y;
@@ -1867,7 +1876,7 @@ public class PolyClip : PolyClipBase
       {
           b1 = edge1.Bot.X - edge1.Bot.Y * edge1.Dx;
           b2 = edge2.Bot.X - edge2.Bot.Y * edge2.Dx;
-          double q = (b2 - b1) / (edge1.Dx - edge2.Dx);
+          var q = (b2 - b1) / (edge1.Dx - edge2.Dx);
           ip.Y = Round(q);
           if (Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx))
               ip.X = Round(edge1.Dx * q + b1);
@@ -1901,23 +1910,23 @@ public class PolyClip : PolyClipBase
 
     private void ProcessEdgesAtTopOfScanbeam(long topY)
     {
-      TEdge e = m_ActiveEdges;
+      var e = m_ActiveEdges;
       while(e != null)
       {
         //1. process maxima, treating them as if they're 'bent' horizontal edges,
         //   but exclude maxima with horizontal edges. nb: e can't be a horizontal.
-        bool IsMaximaEdge = IsMaxima(e, topY);
+        var IsMaximaEdge = IsMaxima(e, topY);
 
         if(IsMaximaEdge)
         {
-          TEdge eMaxPair = GetMaximaPairEx(e);
+          var eMaxPair = GetMaximaPairEx(e);
           IsMaximaEdge = (eMaxPair == null || !IsHorizontal(eMaxPair));
         }
 
         if(IsMaximaEdge)
         {
           if (StrictlySimple) InsertMaxima(e.Top.X);
-          TEdge ePrev = e.PrevInAEL;
+          var ePrev = e.PrevInAEL;
           DoMaxima(e);
           if( ePrev == null) e = m_ActiveEdges;
           else e = ePrev.NextInAEL;
@@ -1941,14 +1950,14 @@ public class PolyClip : PolyClipBase
           //make sure both edges have a vertex here ...
           if (StrictlySimple)
           {
-            TEdge ePrev = e.PrevInAEL;
+            var ePrev = e.PrevInAEL;
             if ((e.OutIdx >= 0) && (e.WindDelta != 0) && ePrev != null &&
               (ePrev.OutIdx >= 0) && (ePrev.Curr.X == e.Curr.X) &&
               (ePrev.WindDelta != 0))
             {
-              IntPoint ip = new IntPoint(e.Curr);
-              OutPt op = AddOutPt(ePrev, ip);
-              OutPt op2 = AddOutPt(e, ip);
+              var ip = new IntPoint(e.Curr);
+              var op = AddOutPt(ePrev, ip);
+              var op2 = AddOutPt(e, ip);
               AddJoin(op, op2, ip); //StrictlySimple (type-3) join
             }
           }
@@ -1973,15 +1982,15 @@ public class PolyClip : PolyClipBase
           UpdateEdgeIntoAEL(ref e);
 
           //if output polygons share an edge, they'll need joining later ...
-          TEdge ePrev = e.PrevInAEL;
-          TEdge eNext = e.NextInAEL;
+          var ePrev = e.PrevInAEL;
+          var eNext = e.NextInAEL;
           if (ePrev != null && ePrev.Curr.X == e.Bot.X &&
             ePrev.Curr.Y == e.Bot.Y && op != null &&
             ePrev.OutIdx >= 0 && ePrev.Curr.Y > ePrev.Top.Y &&
             SlopesEqual(e.Curr, e.Top, ePrev.Curr, ePrev.Top, m_UseFullRange) &&
             (e.WindDelta != 0) && (ePrev.WindDelta != 0))
           {
-            OutPt op2 = AddOutPt(ePrev, e.Bot);
+            var op2 = AddOutPt(ePrev, e.Bot);
             AddJoin(op, op2, e.Top);
           }
           else if (eNext != null && eNext.Curr.X == e.Bot.X &&
@@ -1990,7 +1999,7 @@ public class PolyClip : PolyClipBase
             SlopesEqual(e.Curr, e.Top, eNext.Curr, eNext.Top, m_UseFullRange) &&
             (e.WindDelta != 0) && (eNext.WindDelta != 0))
           {
-            OutPt op2 = AddOutPt(eNext, e.Bot);
+            var op2 = AddOutPt(eNext, e.Bot);
             AddJoin(op, op2, e.Top);
           }
         }
@@ -2001,7 +2010,7 @@ public class PolyClip : PolyClipBase
 
     private void DoMaxima(TEdge e)
     {
-      TEdge eMaxPair = GetMaximaPairEx(e);
+      var eMaxPair = GetMaximaPairEx(e);
       if (eMaxPair == null)
       {
         if (e.OutIdx >= 0)
@@ -2010,7 +2019,7 @@ public class PolyClip : PolyClipBase
         return;
       }
 
-      TEdge eNext = e.NextInAEL;
+      var eNext = e.NextInAEL;
       while(eNext != null && eNext != eMaxPair)
       {
         IntersectEdges(e, eNext, e.Top);
@@ -2078,8 +2087,8 @@ public class PolyClip : PolyClipBase
     private int PointCount(OutPt pts)
     {
         if (pts == null) return 0;
-        int result = 0;
-        OutPt p = pts;
+        var result = 0;
+        var p = pts;
         do
         {
             result++;
@@ -2094,15 +2103,15 @@ public class PolyClip : PolyClipBase
     {
         polyg.Clear();
         polyg.Capacity = m_PolyOuts.Count;
-        for (int i = 0; i < m_PolyOuts.Count; i++)
+        for (var i = 0; i < m_PolyOuts.Count; i++)
         {
-            OutRec outRec = m_PolyOuts[i];
+            var outRec = m_PolyOuts[i];
             if (outRec.Pts == null) continue;
-            OutPt p = outRec.Pts.Prev;
-            int cnt = PointCount(p);
+            var p = outRec.Pts.Prev;
+            var cnt = PointCount(p);
             if (cnt < 2) continue;
-            Path pg = new Path(cnt);
-            for (int j = 0; j < cnt; j++)
+            var pg = new Path(cnt);
+            for (var j = 0; j < cnt; j++)
             {
                 pg.Add(p.Pt);
                 p = p.Prev;
@@ -2118,19 +2127,19 @@ public class PolyClip : PolyClipBase
 
         //add each output polygon/contour to polytree ...
         polytree.m_AllPolys.Capacity = m_PolyOuts.Count;
-        for (int i = 0; i < m_PolyOuts.Count; i++)
+        for (var i = 0; i < m_PolyOuts.Count; i++)
         {
-            OutRec outRec = m_PolyOuts[i];
-            int cnt = PointCount(outRec.Pts);
+            var outRec = m_PolyOuts[i];
+            var cnt = PointCount(outRec.Pts);
             if ((outRec.IsOpen && cnt < 2) || 
               (!outRec.IsOpen && cnt < 3)) continue;
             FixHoleLinkage(outRec);
-            PolyNode pn = new PolyNode();
+            var pn = new PolyNode();
             polytree.m_AllPolys.Add(pn);
             outRec.PolyNode = pn;
             pn.m_polygon.Capacity = cnt;
-            OutPt op = outRec.Pts.Prev;
-            for (int j = 0; j < cnt; j++)
+            var op = outRec.Pts.Prev;
+            for (var j = 0; j < cnt; j++)
             {
                 pn.m_polygon.Add(op.Pt);
                 op = op.Prev;
@@ -2139,17 +2148,17 @@ public class PolyClip : PolyClipBase
 
         //fixup PolyNode links etc ...
         polytree.m_Childs.Capacity = m_PolyOuts.Count;
-        for (int i = 0; i < m_PolyOuts.Count; i++)
+        for (var i = 0; i < m_PolyOuts.Count; i++)
         {
-            OutRec outRec = m_PolyOuts[i];
+            var outRec = m_PolyOuts[i];
+            // ReSharper disable once RedundantJumpStatement
             if (outRec.PolyNode == null) continue;
             else if (outRec.IsOpen)
             {
               outRec.PolyNode.IsOpen = true;
               polytree.AddChild(outRec.PolyNode);
             }
-            else if (outRec.FirstLeft != null && 
-              outRec.FirstLeft.PolyNode != null)
+            else if (outRec.FirstLeft is { PolyNode: not null })
                 outRec.FirstLeft.PolyNode.AddChild(outRec.PolyNode);
             else
               polytree.AddChild(outRec.PolyNode);
@@ -2159,15 +2168,15 @@ public class PolyClip : PolyClipBase
 
     private void FixupOutPolyline(OutRec outrec)
     {
-      OutPt pp = outrec.Pts;
-      OutPt lastPP = pp.Prev;
+      var pp = outrec.Pts;
+      var lastPP = pp.Prev;
       while (pp != lastPP)
       {
           pp = pp.Next;
           if (pp.Pt == pp.Prev.Pt)
           {
               if (pp == lastPP) lastPP = pp.Prev;
-              OutPt tmpPP = pp.Prev;
+              var tmpPP = pp.Prev;
               tmpPP.Next = pp.Next;
               pp.Next.Prev = tmpPP;
               pp = tmpPP;
@@ -2183,8 +2192,8 @@ public class PolyClip : PolyClipBase
         //parallel edges by removing the middle vertex.
         OutPt lastOK = null;
         outRec.BottomPt = null;
-        OutPt pp = outRec.Pts;
-        bool preserveCol = PreserveCollinear || StrictlySimple;
+        var pp = outRec.Pts;
+        var preserveCol = PreserveCollinear || StrictlySimple;
         for (;;)
         {
             if (pp.Prev == pp || pp.Prev == pp.Next)
@@ -2215,7 +2224,7 @@ public class PolyClip : PolyClipBase
 
     OutPt DupOutPt(OutPt outPt, bool InsertAfter)
     {
-      OutPt result = new OutPt();
+      var result = new OutPt();
       result.Pt = outPt.Pt;
       result.Idx = outPt.Idx;
       if (InsertAfter)
@@ -2255,9 +2264,9 @@ public class PolyClip : PolyClipBase
     bool JoinHorz(OutPt op1, OutPt op1b, OutPt op2, OutPt op2b, 
       IntPoint Pt, bool DiscardLeft)
     {
-      Direction Dir1 = (op1.Pt.X > op1b.Pt.X ? 
+      var Dir1 = (op1.Pt.X > op1b.Pt.X ? 
         Direction.dRightToLeft : Direction.dLeftToRight);
-      Direction Dir2 = (op2.Pt.X > op2b.Pt.X ?
+      var Dir2 = (op2.Pt.X > op2b.Pt.X ?
         Direction.dRightToLeft : Direction.dLeftToRight);
       if (Dir1 == Dir2) return false;
 
@@ -2307,7 +2316,7 @@ public class PolyClip : PolyClipBase
           op2 = op2b;
           op2.Pt = Pt;
           op2b = DupOutPt(op2, !DiscardLeft);
-        };
+        }
       } else
       {
         while (op2.Next.Pt.X >= Pt.X && 
@@ -2320,8 +2329,8 @@ public class PolyClip : PolyClipBase
           op2 = op2b;
           op2.Pt = Pt;
           op2b = DupOutPt(op2, DiscardLeft);
-        };
-      };
+        }
+      }
 
       if ((Dir1 == Direction.dLeftToRight) == DiscardLeft)
       {
@@ -2353,7 +2362,7 @@ public class PolyClip : PolyClipBase
       //location at the Bottom of the overlapping segment (& Join.OffPt is above).
       //3. StrictlySimple joins where edges touch but are not collinear and where
       //Join.OutPt1, Join.OutPt2 & Join.OffPt all share the same point.
-      bool isHorizontal = (j.OutPt1.Pt.Y == j.OffPt.Y);
+      var isHorizontal = (j.OutPt1.Pt.Y == j.OffPt.Y);
 
       if (isHorizontal && (j.OffPt == j.OutPt1.Pt) && (j.OffPt == j.OutPt2.Pt))
       {          
@@ -2362,11 +2371,11 @@ public class PolyClip : PolyClipBase
         op1b = j.OutPt1.Next;
         while (op1b != op1 && (op1b.Pt == j.OffPt)) 
           op1b = op1b.Next;
-        bool reverse1 = (op1b.Pt.Y > j.OffPt.Y);
+        var reverse1 = (op1b.Pt.Y > j.OffPt.Y);
         op2b = j.OutPt2.Next;
         while (op2b != op2 && (op2b.Pt == j.OffPt)) 
           op2b = op2b.Next;
-        bool reverse2 = (op2b.Pt.Y > j.OffPt.Y);
+        var reverse2 = (op2b.Pt.Y > j.OffPt.Y);
         if (reverse1 == reverse2) return false;
         if (reverse1)
         {
@@ -2449,19 +2458,20 @@ public class PolyClip : PolyClipBase
         //make sure the polygons are correctly oriented ...
         op1b = op1.Next;
         while ((op1b.Pt == op1.Pt) && (op1b != op1)) op1b = op1b.Next;
-        bool Reverse1 = ((op1b.Pt.Y > op1.Pt.Y) ||
-          !SlopesEqual(op1.Pt, op1b.Pt, j.OffPt, m_UseFullRange));
+        var Reverse1 = ((op1b.Pt.Y > op1.Pt.Y) ||
+                        !SlopesEqual(op1.Pt, op1b.Pt, j.OffPt, m_UseFullRange));
         if (Reverse1)
         {
           op1b = op1.Prev;
           while ((op1b.Pt == op1.Pt) && (op1b != op1)) op1b = op1b.Prev;
           if ((op1b.Pt.Y > op1.Pt.Y) ||
             !SlopesEqual(op1.Pt, op1b.Pt, j.OffPt, m_UseFullRange)) return false;
-        };
+        }
+
         op2b = op2.Next;
         while ((op2b.Pt == op2.Pt) && (op2b != op2)) op2b = op2b.Next;
-        bool Reverse2 = ((op2b.Pt.Y > op2.Pt.Y) ||
-          !SlopesEqual(op2.Pt, op2b.Pt, j.OffPt, m_UseFullRange));
+        var Reverse2 = ((op2b.Pt.Y > op2.Pt.Y) ||
+                        !SlopesEqual(op2.Pt, op2b.Pt, j.OffPt, m_UseFullRange));
         if (Reverse2)
         {
           op2b = op2.Prev;
@@ -2516,10 +2526,10 @@ public class PolyClip : PolyClipBase
       //http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.88.5498&rep=rep1&type=pdf
       int result = 0, cnt = path.Count;
       if (cnt < 3) return 0;
-      IntPoint ip = path[0];
-      for (int i = 1; i <= cnt; ++i)
+      var ip = path[0];
+      for (var i = 1; i <= cnt; ++i)
       {
-        IntPoint ipNext = (i == cnt ? path[0] : path[i]);
+        var ipNext = (i == cnt ? path[0] : path[i]);
         if (ipNext.Y == pt.Y)
         {
           if ((ipNext.X == pt.X) || (ip.Y == pt.Y &&
@@ -2532,8 +2542,8 @@ public class PolyClip : PolyClipBase
             if (ipNext.X > pt.X) result = 1 - result;
             else
             {
-              double d = (double)(ip.X - pt.X) * (ipNext.Y - pt.Y) -
-                (double)(ipNext.X - pt.X) * (ip.Y - pt.Y);
+              var d = (double)(ip.X - pt.X) * (ipNext.Y - pt.Y) -
+                      (double)(ipNext.X - pt.X) * (ip.Y - pt.Y);
               if (d == 0) return -1;
               else if ((d > 0) == (ipNext.Y > ip.Y)) result = 1 - result;
             }
@@ -2542,8 +2552,8 @@ public class PolyClip : PolyClipBase
           {
             if (ipNext.X > pt.X)
             {
-              double d = (double)(ip.X - pt.X) * (ipNext.Y - pt.Y) -
-                (double)(ipNext.X - pt.X) * (ip.Y - pt.Y);
+              var d = (double)(ip.X - pt.X) * (ipNext.Y - pt.Y) -
+                      (double)(ipNext.X - pt.X) * (ip.Y - pt.Y);
               if (d == 0) return -1;
               else if ((d > 0) == (ipNext.Y > ip.Y)) result = 1 - result;
             }
@@ -2560,8 +2570,8 @@ public class PolyClip : PolyClipBase
     private static int PointInPolygon(IntPoint pt, OutPt op)
     {
       //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
-      int result = 0;
-      OutPt startOp = op;
+      var result = 0;
+      var startOp = op;
       long ptx = pt.X, pty = pt.Y;
       long poly0x = op.Pt.X, poly0y = op.Pt.Y;
       do
@@ -2581,8 +2591,8 @@ public class PolyClip : PolyClipBase
             if (poly1x > ptx) result = 1 - result;
             else
             {
-              double d = (double)(poly0x - ptx) * (poly1y - pty) -
-                (double)(poly1x - ptx) * (poly0y - pty);
+              var d = (double)(poly0x - ptx) * (poly1y - pty) -
+                      (double)(poly1x - ptx) * (poly0y - pty);
               if (d == 0) return -1;
               if ((d > 0) == (poly1y > poly0y)) result = 1 - result;
             }
@@ -2591,8 +2601,8 @@ public class PolyClip : PolyClipBase
           {
             if (poly1x > ptx)
             {
-              double d = (double)(poly0x - ptx) * (poly1y - pty) -
-                (double)(poly1x - ptx) * (poly0y - pty);
+              var d = (double)(poly0x - ptx) * (poly1y - pty) -
+                      (double)(poly1x - ptx) * (poly0y - pty);
               if (d == 0) return -1;
               if ((d > 0) == (poly1y > poly0y)) result = 1 - result;
             }
@@ -2606,11 +2616,11 @@ public class PolyClip : PolyClipBase
 
     private static bool Poly2ContainsPoly1(OutPt outPt1, OutPt outPt2)
     {
-      OutPt op = outPt1;
+      var op = outPt1;
       do
       {
         //nb: PointInPolygon returns 0 if false, +1 if true, -1 if pt on polygon
-        int res = PointInPolygon(op.Pt, outPt2);
+        var res = PointInPolygon(op.Pt, outPt2);
         if (res >= 0) return res > 0;
         op = op.Next;
       }
@@ -2621,9 +2631,9 @@ public class PolyClip : PolyClipBase
 
     private void FixupFirstLefts1(OutRec OldOutRec, OutRec NewOutRec)
     { 
-      foreach (OutRec outRec in m_PolyOuts)
+      foreach (var outRec in m_PolyOuts)
       {
-        OutRec firstLeft = ParseFirstLeft(outRec.FirstLeft);
+        var firstLeft = ParseFirstLeft(outRec.FirstLeft);
         if (outRec.Pts != null && firstLeft == OldOutRec)
         {
           if (Poly2ContainsPoly1(outRec.Pts, NewOutRec.Pts))
@@ -2639,12 +2649,12 @@ public class PolyClip : PolyClipBase
       //It's possible that these polygons now wrap around other polygons, so check
       //every polygon that's also contained by OuterOutRec's FirstLeft container
       //(including nil) to see if they've become inner to the new inner polygon ...
-      OutRec orfl = outerOutRec.FirstLeft;
-      foreach (OutRec outRec in m_PolyOuts)
+      var orfl = outerOutRec.FirstLeft;
+      foreach (var outRec in m_PolyOuts)
       {
         if (outRec.Pts == null || outRec == outerOutRec || outRec == innerOutRec) 
           continue;
-        OutRec firstLeft = ParseFirstLeft(outRec.FirstLeft);
+        var firstLeft = ParseFirstLeft(outRec.FirstLeft);
         if (firstLeft != orfl && firstLeft != innerOutRec && firstLeft != outerOutRec) 
           continue;
         if (Poly2ContainsPoly1(outRec.Pts, innerOutRec.Pts))
@@ -2660,9 +2670,9 @@ public class PolyClip : PolyClipBase
     private void FixupFirstLefts3(OutRec OldOutRec, OutRec NewOutRec)
     {
       //same as FixupFirstLefts1 but doesn't call Poly2ContainsPoly1()
-      foreach (OutRec outRec in m_PolyOuts)
+      foreach (var outRec in m_PolyOuts)
       {
-        OutRec firstLeft = ParseFirstLeft(outRec.FirstLeft);
+        var firstLeft = ParseFirstLeft(outRec.FirstLeft);
         if (outRec.Pts != null && firstLeft == OldOutRec) 
           outRec.FirstLeft = NewOutRec;
       }
@@ -2679,12 +2689,12 @@ public class PolyClip : PolyClipBase
 
   private void JoinCommonEdges()
     {
-      for (int i = 0; i < m_Joins.Count; i++)
+      for (var i = 0; i < m_Joins.Count; i++)
       {
-        Join join = m_Joins[i];
+        var join = m_Joins[i];
 
-        OutRec outRec1 = GetOutRec(join.OutPt1.Idx);
-        OutRec outRec2 = GetOutRec(join.OutPt2.Idx);
+        var outRec1 = GetOutRec(join.OutPt1.Idx);
+        var outRec2 = GetOutRec(join.OutPt2.Idx);
 
         if (outRec1.Pts == null || outRec2.Pts == null) continue;
         if (outRec1.IsOpen || outRec2.IsOpen) continue;
@@ -2768,7 +2778,7 @@ public class PolyClip : PolyClipBase
 
     private void UpdateOutPtIdxs(OutRec outrec)
     {  
-      OutPt op = outrec.Pts;
+      var op = outrec.Pts;
       do
       {
         op.Idx = outrec.Idx;
@@ -2780,29 +2790,29 @@ public class PolyClip : PolyClipBase
 
     private void DoSimplePolygons()
     {
-      int i = 0;
+      var i = 0;
       while (i < m_PolyOuts.Count) 
       {
-        OutRec outrec = m_PolyOuts[i++];
-        OutPt op = outrec.Pts;
+        var outrec = m_PolyOuts[i++];
+        var op = outrec.Pts;
         if (op == null || outrec.IsOpen) continue;
         do //for each Pt in Polygon until duplicate found do ...
         {
-          OutPt op2 = op.Next;
+          var op2 = op.Next;
           while (op2 != outrec.Pts) 
           {
             if ((op.Pt == op2.Pt) && op2.Next != op && op2.Prev != op) 
             {
               //split the polygon into two ...
-              OutPt op3 = op.Prev;
-              OutPt op4 = op2.Prev;
+              var op3 = op.Prev;
+              var op4 = op2.Prev;
               op.Prev = op4;
               op4.Next = op;
               op2.Prev = op3;
               op3.Next = op2;
 
               outrec.Pts = op;
-              OutRec outrec2 = CreateOutRec();
+              var outrec2 = CreateOutRec();
               outrec2.Pts = op2;
               UpdateOutPtIdxs(outrec2);
               if (Poly2ContainsPoly1(outrec2.Pts, outrec.Pts))
@@ -2850,7 +2860,7 @@ public class PolyClip : PolyClipBase
     /// </returns>
     public static double Area(Path poly)
     {
-      int cnt = (int)poly.Count;
+      var cnt = poly.Count;
       if (cnt < 3) return 0;
       double a = 0;
       for (int i = 0, j = cnt - 1; i < cnt; ++i)
@@ -2870,11 +2880,11 @@ public class PolyClip : PolyClipBase
 
     internal double Area(OutPt op)
     {
-      OutPt opFirst = op;
+      var opFirst = op;
       if (op == null) return 0;
       double a = 0;
       do {
-        a = a + (double)(op.Prev.Pt.X + op.Pt.X) * (double)(op.Prev.Pt.Y - op.Pt.Y);
+        a = a + (op.Prev.Pt.X + op.Pt.X) * (double)(op.Prev.Pt.Y - op.Pt.Y);
         op = op.Next;
       } while (op != opFirst);
       return a * 0.5;
@@ -2898,8 +2908,8 @@ public class PolyClip : PolyClipBase
     public static Paths SimplifyPolygon(Path poly, 
           PolyFillType fillType = PolyFillType.pftEvenOdd)
     {
-        Paths result = new Paths();
-        PolyClip c = new PolyClip();
+        var result = new Paths();
+        var c = new PolyClip();
         c.StrictlySimple = true;
         c.AddPath(poly, PolyType.ptSubject, true);
         c.Execute(ClipType.ctUnion, result, fillType, fillType);
@@ -2920,8 +2930,8 @@ public class PolyClip : PolyClipBase
     public static Paths SimplifyPolygons(Paths polys,
         PolyFillType fillType = PolyFillType.pftEvenOdd)
     {
-        Paths result = new Paths();
-        PolyClip c = new PolyClip();
+        var result = new Paths();
+        var c = new PolyClip();
         c.StrictlySimple = true;
         c.AddPaths(polys, PolyType.ptSubject, true);
         c.Execute(ClipType.ctUnion, result, fillType, fillType);
@@ -2931,8 +2941,8 @@ public class PolyClip : PolyClipBase
 
     private static double DistanceSqrd(IntPoint pt1, IntPoint pt2)
     {
-      double dx = ((double)pt1.X - pt2.X);
-      double dy = ((double)pt1.Y - pt2.Y);
+      var dx = ((double)pt1.X - pt2.X);
+      var dy = ((double)pt1.Y - pt2.Y);
       return (dx*dx + dy*dy);
     }
     //------------------------------------------------------------------------------
@@ -2947,7 +2957,7 @@ public class PolyClip : PolyClipBase
       //see http://en.wikipedia.org/wiki/Perpendicular_distance
       double A = ln1.Y - ln2.Y;
       double B = ln2.X - ln1.X;
-      double C = A * ln1.X  + B * ln1.Y;
+      var C = A * ln1.X  + B * ln1.Y;
       C = A * pt.X + B * pt.Y - C;
       return (C * C) / (A * A + B * B);
     }
@@ -2960,37 +2970,37 @@ public class PolyClip : PolyClipBase
       //between the other 2 points is the one that's tested for distance.  
       //nb: with 'spikes', either pt1 or pt3 is geometrically between the other pts                    
       if (Math.Abs(pt1.X - pt2.X) > Math.Abs(pt1.Y - pt2.Y))
-	      {
+      {
         if ((pt1.X > pt2.X) == (pt1.X < pt3.X))
           return DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
         else if ((pt2.X > pt1.X) == (pt2.X < pt3.X))
           return DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
-		      else
-	          return DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
-	      }
-	      else
-	      {
-        if ((pt1.Y > pt2.Y) == (pt1.Y < pt3.Y))
-          return DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
-        else if ((pt2.Y > pt1.Y) == (pt2.Y < pt3.Y))
-          return DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
-		      else
-          return DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
-	      }
+        else
+            return DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
+      }
+      else
+      {
+          if ((pt1.Y > pt2.Y) == (pt1.Y < pt3.Y))
+              return DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
+          else if ((pt2.Y > pt1.Y) == (pt2.Y < pt3.Y))
+              return DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
+          else
+              return DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
+      }
     }
     //------------------------------------------------------------------------------
 
     private static bool PointsAreClose(IntPoint pt1, IntPoint pt2, double distSqrd)
     {
-        double dx = (double)pt1.X - pt2.X;
-        double dy = (double)pt1.Y - pt2.Y;
+        var dx = (double)pt1.X - pt2.X;
+        var dy = (double)pt1.Y - pt2.Y;
         return ((dx * dx) + (dy * dy) <= distSqrd);
     }
     //------------------------------------------------------------------------------
 
     private static OutPt ExcludeOp(OutPt op)
     {
-      OutPt result = op.Prev;
+      var result = op.Prev;
       result.Next = op.Next;
       op.Next.Prev = result;
       result.Idx = 0;
@@ -3016,14 +3026,14 @@ public class PolyClip : PolyClipBase
       //Default ~= sqrt(2) so when adjacent vertices or semi-adjacent vertices have 
       //both x & y coords within 1 unit, then the second vertex will be stripped.
 
-      int cnt = path.Count;
+      var cnt = path.Count;
 
       if (cnt == 0) return new Path();
 
-      OutPt [] outPts = new OutPt[cnt];
-      for (int i = 0; i < cnt; ++i) outPts[i] = new OutPt();
+      var outPts = new OutPt[cnt];
+      for (var i = 0; i < cnt; ++i) outPts[i] = new OutPt();
 
-      for (int i = 0; i < cnt; ++i)
+      for (var i = 0; i < cnt; ++i)
       {
         outPts[i].Pt = path[i];
         outPts[i].Next = outPts[(i + 1) % cnt];
@@ -3031,8 +3041,8 @@ public class PolyClip : PolyClipBase
         outPts[i].Idx = 0;
       }
 
-      double distSqrd = distance * distance;
-      OutPt op = outPts[0];
+      var distSqrd = distance * distance;
+      var op = outPts[0];
       while (op.Idx == 0 && op.Next != op.Prev)
       {
         if (PointsAreClose(op.Pt, op.Prev.Pt, distSqrd))
@@ -3059,12 +3069,13 @@ public class PolyClip : PolyClipBase
       }
 
       if (cnt < 3) cnt = 0;
-      Path result = new Path(cnt);
-      for (int i = 0; i < cnt; ++i)
+      var result = new Path(cnt);
+      for (var i = 0; i < cnt; ++i)
       {
         result.Add(op.Pt);
         op = op.Next;
       }
+      // ReSharper disable once RedundantAssignment
       outPts = null;
       return result;
     }
@@ -3085,8 +3096,8 @@ public class PolyClip : PolyClipBase
     public static Paths CleanPolygons(Paths polys,
         double distance = 1.415)
     {
-      Paths result = new Paths(polys.Count);
-      for (int i = 0; i < polys.Count; i++)
+      var result = new Paths(polys.Count);
+      for (var i = 0; i < polys.Count; i++)
         result.Add(CleanPolygon(polys[i], distance));
       return result;
     }
@@ -3094,32 +3105,32 @@ public class PolyClip : PolyClipBase
 
     internal static Paths Minkowski(Path pattern, Path path, bool IsSum, bool IsClosed)
     {
-      int delta = (IsClosed ? 1 : 0);
-      int polyCnt = pattern.Count;
-      int pathCnt = path.Count;
-      Paths result = new Paths(pathCnt);
+      var delta = (IsClosed ? 1 : 0);
+      var polyCnt = pattern.Count;
+      var pathCnt = path.Count;
+      var result = new Paths(pathCnt);
       if (IsSum)
-        for (int i = 0; i < pathCnt; i++)
+        for (var i = 0; i < pathCnt; i++)
         {
-          Path p = new Path(polyCnt);
-          foreach (IntPoint ip in pattern)
+          var p = new Path(polyCnt);
+          foreach (var ip in pattern)
             p.Add(new IntPoint(path[i].X + ip.X, path[i].Y + ip.Y));
           result.Add(p);
         }
       else
-        for (int i = 0; i < pathCnt; i++)
+        for (var i = 0; i < pathCnt; i++)
         {
-          Path p = new Path(polyCnt);
-          foreach (IntPoint ip in pattern)
+          var p = new Path(polyCnt);
+          foreach (var ip in pattern)
             p.Add(new IntPoint(path[i].X - ip.X, path[i].Y - ip.Y));
           result.Add(p);
         }
 
-      Paths quads = new Paths((pathCnt + delta) * (polyCnt + 1));
-      for (int i = 0; i < pathCnt - 1 + delta; i++)
-        for (int j = 0; j < polyCnt; j++)
+      var quads = new Paths((pathCnt + delta) * (polyCnt + 1));
+      for (var i = 0; i < pathCnt - 1 + delta; i++)
+        for (var j = 0; j < polyCnt; j++)
         {
-          Path quad = new Path(4);
+          var quad = new Path(4);
           quad.Add(result[i % pathCnt][j % polyCnt]);
           quad.Add(result[(i + 1) % pathCnt][j % polyCnt]);
           quad.Add(result[(i + 1) % pathCnt][(j + 1) % polyCnt]);
@@ -3141,8 +3152,8 @@ public class PolyClip : PolyClipBase
     /// <returns>The paths that bound the swept region.</returns>
     public static Paths MinkowskiSum(Path pattern, Path path, bool pathIsClosed)
     {
-      Paths paths = Minkowski(pattern, path, true, pathIsClosed);
-      PolyClip c = new PolyClip();
+      var paths = Minkowski(pattern, path, true, pathIsClosed);
+      var c = new PolyClip();
       c.AddPaths(paths, PolyType.ptSubject, true);
       c.Execute(ClipType.ctUnion, paths, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
       return paths;
@@ -3151,8 +3162,8 @@ public class PolyClip : PolyClipBase
 
     private static Path TranslatePath(Path path, IntPoint delta) 
     {
-      Path outPath = new Path(path.Count);
-      for (int i = 0; i < path.Count; i++)
+      var outPath = new Path(path.Count);
+      for (var i = 0; i < path.Count; i++)
         outPath.Add(new IntPoint(path[i].X + delta.X, path[i].Y + delta.Y));
       return outPath;
     }
@@ -3168,15 +3179,15 @@ public class PolyClip : PolyClipBase
     /// <returns>The paths that bound the swept region.</returns>
     public static Paths MinkowskiSum(Path pattern, Paths paths, bool pathIsClosed)
     {
-      Paths solution = new Paths();
-      PolyClip c = new PolyClip();
-      for (int i = 0; i < paths.Count; ++i)
+      var solution = new Paths();
+      var c = new PolyClip();
+      for (var i = 0; i < paths.Count; ++i)
       {
-        Paths tmp = Minkowski(pattern, paths[i], true, pathIsClosed);
+        var tmp = Minkowski(pattern, paths[i], true, pathIsClosed);
         c.AddPaths(tmp, PolyType.ptSubject, true);
         if (pathIsClosed)
         {
-          Path path = TranslatePath(paths[i], pattern[0]);
+          var path = TranslatePath(paths[i], pattern[0]);
           c.AddPath(path, PolyType.ptClip, true);
         }
       }
@@ -3195,8 +3206,8 @@ public class PolyClip : PolyClipBase
     /// <returns>The paths that bound the resulting region.</returns>
     public static Paths MinkowskiDiff(Path poly1, Path poly2)
     {
-      Paths paths = Minkowski(poly1, poly2, false, true);
-      PolyClip c = new PolyClip();
+      var paths = Minkowski(poly1, poly2, false, true);
+      var c = new PolyClip();
       c.AddPaths(paths, PolyType.ptSubject, true);
       c.Execute(ClipType.ctUnion, paths, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
       return paths;
@@ -3214,7 +3225,7 @@ public class PolyClip : PolyClipBase
     public static Paths PolyTreeToPaths(PolyTree polytree)
     {
 
-      Paths result = new Paths();
+      var result = new Paths();
       result.Capacity = polytree.Total;
       AddPolyNodeToPaths(polytree, NodeType.ntAny, result);
       return result;
@@ -3223,17 +3234,18 @@ public class PolyClip : PolyClipBase
 
     internal static void AddPolyNodeToPaths(PolyNode polynode, NodeType nt, Paths paths)
     {
-      bool match = true;
+      var match = true;
       switch (nt)
       {
         case NodeType.ntOpen: return;
         case NodeType.ntClosed: match = !polynode.IsOpen; break;
+        // ReSharper disable once RedundantEmptySwitchSection
         default: break;
       }
 
       if (polynode.m_polygon.Count > 0 && match)
         paths.Add(polynode.m_polygon);
-      foreach (PolyNode pn in polynode.Childs)
+      foreach (var pn in polynode.Childs)
         AddPolyNodeToPaths(pn, nt, paths);
     }
     //------------------------------------------------------------------------------
@@ -3245,9 +3257,9 @@ public class PolyClip : PolyClipBase
     /// <returns>The open paths held by the tree.</returns>
     public static Paths OpenPathsFromPolyTree(PolyTree polytree)
     {
-      Paths result = new Paths();
+      var result = new Paths();
       result.Capacity = polytree.ChildCount;
-      for (int i = 0; i < polytree.ChildCount; i++)
+      for (var i = 0; i < polytree.ChildCount; i++)
         if (polytree.Childs[i].IsOpen)
           result.Add(polytree.Childs[i].m_polygon);
       return result;
@@ -3261,7 +3273,7 @@ public class PolyClip : PolyClipBase
     /// <returns>The closed paths held by the tree.</returns>
     public static Paths ClosedPathsFromPolyTree(PolyTree polytree)
     {
-      Paths result = new Paths();
+      var result = new Paths();
       result.Capacity = polytree.Total;
       AddPolyNodeToPaths(polytree, NodeType.ntClosed, result);
       return result;

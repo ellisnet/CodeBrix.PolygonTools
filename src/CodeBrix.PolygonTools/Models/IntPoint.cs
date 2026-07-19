@@ -31,14 +31,6 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
-using CodeBrix.PolygonTools.Enumerations;
-using CodeBrix.PolygonTools.Internal;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
-
 namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 
 /// <summary>
@@ -66,11 +58,11 @@ public struct IntPoint
   /// <summary>
   /// Initializes a new <see cref="IntPoint"/> with the supplied coordinates.
   /// </summary>
-  /// <param name="X">The X coordinate.</param>
-  /// <param name="Y">The Y coordinate.</param>
-  public IntPoint(long X, long Y)
+  /// <param name="x">The X coordinate.</param>
+  /// <param name="y">The Y coordinate.</param>
+  public IntPoint(long x, long y)
   {
-      this.X = X; this.Y = Y;
+      X = x; Y = y;
   }
   /// <summary>
   /// Initializes a new <see cref="IntPoint"/> from floating-point coordinates, truncating
@@ -80,7 +72,7 @@ public struct IntPoint
   /// <param name="y">The Y coordinate.</param>
   public IntPoint(double x, double y)
   {
-    this.X = (long)x; this.Y = (long)y;
+    X = (long)x; Y = (long)y;
   }
 
   /// <summary>
@@ -89,7 +81,7 @@ public struct IntPoint
   /// <param name="pt">The point to copy.</param>
   public IntPoint(IntPoint pt)
   {
-      this.X = pt.X; this.Y = pt.Y;
+      X = pt.X; Y = pt.Y;
   }
 
   /// <summary>
@@ -98,10 +90,7 @@ public struct IntPoint
   /// <param name="a">The first point to compare.</param>
   /// <param name="b">The second point to compare.</param>
   /// <returns><c>true</c> when both coordinates are equal; otherwise <c>false</c>.</returns>
-  public static bool operator ==(IntPoint a, IntPoint b)
-  {
-    return a.X == b.X && a.Y == b.Y;
-  }
+  public static bool operator ==(IntPoint a, IntPoint b) => a.X == b.X && a.Y == b.Y;
 
   /// <summary>
   /// Determines whether two points differ in either coordinate.
@@ -109,10 +98,7 @@ public struct IntPoint
   /// <param name="a">The first point to compare.</param>
   /// <param name="b">The second point to compare.</param>
   /// <returns><c>true</c> when either coordinate differs; otherwise <c>false</c>.</returns>
-  public static bool operator !=(IntPoint a, IntPoint b)
-  {
-    return a.X != b.X  || a.Y != b.Y; 
-  }
+  public static bool operator !=(IntPoint a, IntPoint b) => a.X != b.X  || a.Y != b.Y;
 
   /// <summary>
   /// Determines whether this point is equal to the supplied object.
@@ -124,23 +110,19 @@ public struct IntPoint
   /// </returns>
   public override bool Equals(object obj)
   {
-    if (obj == null) return false;
-    if (obj is IntPoint)
+    if (obj is IntPoint a)
     {
-      IntPoint a = (IntPoint)obj;
       return (X == a.X) && (Y == a.Y);
     }
-    else return false;
+    return false;
   }
 
   /// <summary>
   /// Returns a hash code derived from both coordinates.
   /// </summary>
   /// <returns>A hash code for this point.</returns>
-  public override int GetHashCode()
-  {
-    //simply prevents a compiler warning
-    return base.GetHashCode();
-  }
-
+  public override int GetHashCode() =>
+      //simply prevents a compiler warning
+      // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
+      base.GetHashCode();
 }// end struct IntPoint

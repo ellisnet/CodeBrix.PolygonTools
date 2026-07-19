@@ -31,13 +31,10 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
 using CodeBrix.PolygonTools.Enumerations;
 using CodeBrix.PolygonTools.Models;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
+
+// ReSharper disable InconsistentNaming
 
 namespace CodeBrix.PolygonTools.Internal; //was previously: ClipperLib;
 
@@ -60,4 +57,4 @@ internal class TEdge {
   internal TEdge PrevInAEL;
   internal TEdge NextInSEL;
   internal TEdge PrevInSEL;
-};
+}

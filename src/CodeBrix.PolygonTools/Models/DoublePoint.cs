@@ -31,14 +31,6 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
-using CodeBrix.PolygonTools.Enumerations;
-using CodeBrix.PolygonTools.Internal;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
-
 namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 
 /// <summary>
@@ -63,7 +55,7 @@ public struct DoublePoint
   /// <param name="y">The Y coordinate. Defaults to zero.</param>
   public DoublePoint(double x = 0, double y = 0)
   {
-    this.X = x; this.Y = y;
+    X = x; Y = y;
   }
   /// <summary>
   /// Initializes a new <see cref="DoublePoint"/> that is a copy of another one.
@@ -71,7 +63,7 @@ public struct DoublePoint
   /// <param name="dp">The point to copy.</param>
   public DoublePoint(DoublePoint dp)
   {
-    this.X = dp.X; this.Y = dp.Y;
+    X = dp.X; Y = dp.Y;
   }
   /// <summary>
   /// Initializes a new <see cref="DoublePoint"/> from an integer point, widening both
@@ -80,6 +72,6 @@ public struct DoublePoint
   /// <param name="ip">The integer point to convert.</param>
   public DoublePoint(IntPoint ip)
   {
-    this.X = ip.X; this.Y = ip.Y;
+    X = ip.X; Y = ip.Y;
   }
-};
+}

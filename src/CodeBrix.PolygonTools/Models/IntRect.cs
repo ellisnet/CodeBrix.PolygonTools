@@ -31,13 +31,7 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
-using CodeBrix.PolygonTools.Enumerations;
-using CodeBrix.PolygonTools.Internal;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
+// ReSharper disable InconsistentNaming
 
 namespace CodeBrix.PolygonTools.Models; //was previously: ClipperLib;
 
@@ -72,8 +66,8 @@ public struct IntRect
   /// <param name="b">The Y coordinate of the bottom edge.</param>
   public IntRect(long l, long t, long r, long b)
   {
-    this.left = l; this.top = t;
-    this.right = r; this.bottom = b;
+    left = l; top = t;
+    right = r; bottom = b;
   }
   /// <summary>
   /// Initializes a new <see cref="IntRect"/> that is a copy of another one.
@@ -81,7 +75,7 @@ public struct IntRect
   /// <param name="ir">The rectangle to copy.</param>
   public IntRect(IntRect ir)
   {
-    this.left = ir.left; this.top = ir.top;
-    this.right = ir.right; this.bottom = ir.bottom;
+    left = ir.left; top = ir.top;
+    right = ir.right; bottom = ir.bottom;
   }
 }

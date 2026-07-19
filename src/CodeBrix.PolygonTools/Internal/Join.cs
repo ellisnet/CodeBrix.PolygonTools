@@ -31,13 +31,7 @@
 *                                                                              *
 *******************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using CodeBrix.PolygonTools;
-using CodeBrix.PolygonTools.Enumerations;
 using CodeBrix.PolygonTools.Models;
-using Path = System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>;
-using Paths = System.Collections.Generic.List<System.Collections.Generic.List<CodeBrix.PolygonTools.Models.IntPoint>>;
 
 namespace CodeBrix.PolygonTools.Internal; //was previously: ClipperLib;
 
@@ -46,4 +40,4 @@ internal class Join
   internal OutPt OutPt1;
   internal OutPt OutPt2;
   internal IntPoint OffPt;
-};
+}
