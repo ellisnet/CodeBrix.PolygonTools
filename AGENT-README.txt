@@ -35,8 +35,9 @@ What it supports:
     in the clipping result.
 
 Provenance: this library is derived from the Clipper library ("polyclipping")
-by Angus Johnson, version 6.4.2, which is licensed under the Boost Software
-License 1.0. The single upstream source file was split into one file per type
+by Angus Johnson, which is licensed under the Boost Software License 1.0; the
+exact upstream release is recorded in THIRD-PARTY-NOTICES.txt. The single
+upstream source file was split into one file per type
 and the types were renamed and re-rooted under `CodeBrix.PolygonTools`. Do not
 write `using ClipperLib;` -- that namespace does not exist in this package. The
 upstream type names map as follows:

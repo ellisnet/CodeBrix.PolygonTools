@@ -25,6 +25,8 @@ REPOSITORY LAYOUT
 =================
 
   CodeBrix.PolygonTools.slnx          solution (Solution Items + Tests folders)
+  global.json                         selects the Microsoft.Testing.Platform
+                                      test runner; does NOT pin an SDK version
   AGENT-README.txt                    consumer documentation; SHIPS in the
                                       nupkg
   MAINTAINER-README.txt               this file
@@ -86,6 +88,16 @@ BUILDING
 
   dotnet build CodeBrix.PolygonTools.slnx
 
+global.json at the repo root does NOT pin an SDK version, so the newest
+installed .NET 10 SDK is still used. It exists solely to select the test
+runner:
+
+    { "test": { "runner": "Microsoft.Testing.Platform" } }
+
+Because that setting lives in global.json rather than in the csproj, it applies
+to every `dotnet test` run anywhere in the repository, including CI. Keep the
+file committed - see TESTING.
+
 Requires the .NET 10 SDK. The library targets net10.0 only - there is no
 multi-targeting and no netstandard target. There are no native dependencies, no
 code generators and no pre-build steps.
@@ -106,6 +118,12 @@ TESTING
 =======
 
   dotnet test CodeBrix.PolygonTools.slnx
+
+THE TEST RUNNER IS Microsoft.Testing.Platform (MTP), selected by global.json at
+the repo root. Do not delete that file; without it, `dotnet test` falls back to
+the older VSTest bridge. You can tell which one ran: MTP output ends in a
+"Test run summary:" block, while the VSTest bridge invokes MSBuild with
+`--target:VSTest`. The test project carries no coverage collector.
 
 The suite is xUnit v3 with SilverAssertions, roughly 120 tests. It needs no
 test-data files, no environment variables, no opt-in switches and no network
@@ -262,10 +280,13 @@ NOTES
   * PolyClipOffset.AddPath does not range-check coordinates the way
     PolyClipBase.AddPath does. This asymmetry is upstream behaviour and is
     preserved on purpose; it is documented as a pitfall in AGENT-README.txt.
-  * The solution file must keep its "Solution Items" folder (carrying
-    AGENT-README.txt, LICENSE, license-boost.txt, README.md,
-    THIRD-PARTY-NOTICES.txt and the icon) and its "Tests" folder holding the
-    test project - the family compliance check verifies both.
+  * The solution file must keep its "Solution Items" folder and its "Tests"
+    folder holding the test project - the family compliance check verifies
+    both. Solution Items currently carries all eleven root files: .gitignore,
+    AGENT-README.txt, EXTRAS-README.txt, global.json, icon-codebrix-128.png,
+    LICENSE, license-boost.txt, MAINTAINER-README.txt, README-INDEX.txt,
+    README.md and THIRD-PARTY-NOTICES.txt. When a root file is added or
+    removed, update the folder to match.
 
 
 ================================================================================

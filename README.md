@@ -9,6 +9,21 @@ CodeBrix.PolygonTools supports applications and assemblies that target Microsoft
 Microsoft .NET version 10.0 is a Long-Term Supported (LTS) version of .NET, and was released on Nov 11, 2025; and will be actively supported by Microsoft until Nov 14, 2028.
 Please update your C#/.NET code and projects to the latest LTS version of Microsoft .NET.
 
+## Installation
+
+```
+dotnet add package CodeBrix.PolygonTools.MitLicenseForever
+```
+
+Note that the NuGet package ID and the namespace are different - there is no package named plain `CodeBrix.PolygonTools`:
+
+* NuGet package ID: `CodeBrix.PolygonTools.MitLicenseForever`
+* Assembly and primary namespace: `CodeBrix.PolygonTools` - i.e. `using CodeBrix.PolygonTools;`
+
+XML documentation (IntelliSense) ships alongside the assembly.
+
+The package has no NuGet dependencies at all - nothing beyond .NET itself is pulled in.
+
 ## CodeBrix.PolygonTools supports:
 
 * All four boolean clipping operations on sets of polygons - intersection, union, difference and exclusive-or
@@ -67,10 +82,20 @@ offset.Execute(ref inflated, 10.0);
 //pass a negative delta to Execute in order to shrink the polygon instead
 ```
 
-## Third-party code and licensing
+## Documentation
 
-CodeBrix.PolygonTools is derived from the Clipper library - please see the THIRD-PARTY-NOTICES.txt file in this repository for more information.
+The NuGet package includes `AGENT-README.txt`, a complete API reference and usage guide written for AI coding agents - point your agent at that file when it is writing code against this library.
+
+Additional sample code and usage examples are available in the `CodeBrix.PolygonTools.Tests` project:
+https://github.com/ellisnet/CodeBrix.PolygonTools/tree/main/tests/CodeBrix.PolygonTools.Tests
 
 ## License
 
-The project is licensed under the MIT License. see: https://en.wikipedia.org/wiki/MIT_License
+CodeBrix.PolygonTools is licensed under the MIT License, and portions of it remain subject to the
+Boost Software License 1.0 - see the
+[LICENSE](https://github.com/ellisnet/CodeBrix.PolygonTools/blob/main/LICENSE) file, which carries both
+notices, and [license-boost.txt](https://github.com/ellisnet/CodeBrix.PolygonTools/blob/main/license-boost.txt)
+for the full Boost licence text.
+
+For licensing and provenance information about the open source code included in
+this package, see [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.PolygonTools/blob/main/THIRD-PARTY-NOTICES.txt).
